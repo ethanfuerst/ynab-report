@@ -17,10 +17,9 @@ load_dotenv()
 def extract_budget_data() -> Dict:
     logging.info('Extracting budget data')
 
-
     budget_id = os.getenv('BUDGET_ID')
     url = f'https://api.ynab.com/v1/budgets/{budget_id}'
-    
+
     bearer_token = os.getenv('BEARER_TOKEN')
     headers = {
         'Authorization': f'Bearer {bearer_token}',
@@ -37,7 +36,6 @@ def extract_budget_data() -> Dict:
 def extract_category_groups(
     budget_data: Dict, duckdb_con: duckdb.DuckDBPyConnection
 ) -> None:
-
     category_groups = pd.DataFrame(budget_data['category_groups'])
 
     today = datetime.now()
@@ -55,7 +53,6 @@ def extract_category_groups(
 def extract_categories(
     budget_data: Dict, duckdb_con: duckdb.DuckDBPyConnection
 ) -> None:
-
     rows_loaded = 0
 
     for month in budget_data['months']:
@@ -79,7 +76,6 @@ def extract_categories(
 def extract_transactions(
     budget_data: Dict, duckdb_con: duckdb.DuckDBPyConnection
 ) -> None:
-
     transactions = pd.DataFrame(budget_data['transactions'])
 
     rows_loaded = 0
@@ -104,7 +100,6 @@ def extract_transactions(
 def extract_subtransactions(
     budget_data: Dict, duckdb_con: duckdb.DuckDBPyConnection
 ) -> None:
-
     subtransactions = pd.DataFrame(budget_data['subtransactions'])
 
     rows_loaded = load_df_to_s3_table(
