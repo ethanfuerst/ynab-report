@@ -9,7 +9,7 @@ create or replace table final_transactions as (
             , subtransactions.category_id as sub_category_id
             , subtransactions.amount as subtransaction_amount
             , subtransactions.memo as subtransaction_memo
-            , transactions.transation_date
+            , transactions.transaction_date
         from transactions
         left outer join subtransactions
             on transactions.id = subtransactions.transaction_id
@@ -21,7 +21,7 @@ create or replace table final_transactions as (
             , coalesce(sub_category_id, category_id) as category_id
             , coalesce(subtransaction_amount, amount) as amount
             , coalesce(subtransaction_memo, memo) as memo
-            , transation_date
+            , transaction_date
         from all_transactions
     )
 
@@ -31,7 +31,7 @@ create or replace table final_transactions as (
         , categories.category_group_id
         , categories.name as category_name
         , cleaned_transactions.amount
-        , cleaned_transactions.transation_date
+        , cleaned_transactions.transaction_date
         , category_groups.category_group_name_mapping
         , cleaned_transactions.memo
     from cleaned_transactions
@@ -39,7 +39,7 @@ create or replace table final_transactions as (
         on cleaned_transactions.category_id = categories.id
     left join category_groups
         on categories.category_group_id = category_groups.id
-    order by cleaned_transactions.transation_date desc
+    order by cleaned_transactions.transaction_date desc
 );
 
 create or replace table final_monthly_category_groups as (
@@ -64,8 +64,8 @@ create or replace table monthly_level as (
             , coalesce(subtransactions.amount, transactions.amount) as amount
             , coalesce(subtransactions.memo, transactions.memo) as memo
             , subtransactions.id as subtransaction_id
-            , transactions.transation_date
-            , date_trunc('month', transactions.transation_date)
+            , transactions.transaction_date
+            , date_trunc('month', transactions.transaction_date)
                 as transaction_month
         from transactions
         left outer join subtransactions
@@ -80,7 +80,7 @@ create or replace table monthly_level as (
             , category_groups.category_group_name_mapping
             , all_transactions.amount
             , all_transactions.memo
-            , all_transactions.transation_date
+            , all_transactions.transaction_date
             , all_transactions.transaction_month
         from all_transactions
         left join categories
@@ -239,10 +239,10 @@ create or replace table monthly_level as (
                     select
                         min(
                             date_trunc(
-                                'month', final_transactions.transaction_date
+                                'month', transactions.transaction_date
                             )
                         )
-                    from final_transactions
+                    from transactions
                 )::date
                 , current_date::date
                 , interval '1 month'

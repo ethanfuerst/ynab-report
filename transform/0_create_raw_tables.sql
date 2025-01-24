@@ -5,8 +5,6 @@ create or replace table raw_category_groups as (
         , hidden
         , deleted
         , filename
-        , month
-        , year
     from
         read_parquet(
             's3://$bucket_name/category-groups/*.parquet', filename = true
@@ -68,8 +66,6 @@ create or replace table raw_transactions as (
         , debt_transaction_type
         , deleted
         , filename
-        , month
-        , year
     from
         read_parquet(
             's3://$bucket_name/transactions/**/*.parquet', filename = true
@@ -87,8 +83,6 @@ create or replace table raw_subtransactions as (
         , transfer_account_id
         , deleted
         , filename
-        , month
-        , year
     from
         read_parquet(
             's3://$bucket_name/subtransactions/**/*.parquet', filename = true
