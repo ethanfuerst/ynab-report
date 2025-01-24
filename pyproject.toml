@@ -15,6 +15,7 @@ urllib3 = "^2.3.0"
 pandas = "^2.2.3"
 modal = "^0.72.33"
 duckdb = "^1.1.3"
+sqlfluff = "^3.3.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
@@ -27,3 +28,25 @@ build-backend = "poetry.core.masonry.api"
 line-length = 88
 target-version = ["py310"]
 skip-string-normalization = true
+
+[tool.sqlfluff]
+dialect = "duckdb"
+max_line_length = 80
+indent_unit = "tab"
+tab_space_size = 4
+capitalization_policy = "lower"
+extended_capitalisation_policy = "lower"
+preferred_type_casting_style = "shorthand"
+exclude_rules = "LT05, LT09, ST05"
+
+[tool.sqlfluff.layout.type.comma]
+line_position = "leading"
+
+[tool.sqlfluff.rules.layout.long_lines]
+max_line_length = 80
+
+[tool.sqlfluff.rules.layout.select_targets]
+line_position = "leading"
+
+[tool.sqlfluff.rules.structure.subquery]
+forbid_subquery_in = "both"
