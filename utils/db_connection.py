@@ -8,7 +8,7 @@ load_dotenv()
 
 class DuckDBConnection:
     def __init__(self, need_write_access=False):
-        self.connection = duckdb.connect(read_only=False)
+        self.connection = duckdb.connect(database='ynab_report.duckdb', read_only=False)
         self.need_write_access = need_write_access
         self._configure_connection()
 
