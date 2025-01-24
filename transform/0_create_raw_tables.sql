@@ -9,7 +9,7 @@ create or replace table raw_category_groups as (
         , year
     from
         read_parquet(
-            's3://$bucket_name/category-groups/**/*.parquet', filename = true
+            's3://$bucket_name/category-groups/*.parquet', filename = true
         )
 );
 

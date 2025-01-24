@@ -43,7 +43,7 @@ def extract_category_groups(
     rows_loaded = load_df_to_s3_table(
         duckdb_con=duckdb_con,
         df=category_groups.reset_index(drop=True),
-        s3_key=f'category-groups/year={today.year}/month={today.month}/data',
+        s3_key=f'category-groups/all_data',
         bucket_name=os.getenv('BUCKET_NAME'),
     )
 
