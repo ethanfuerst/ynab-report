@@ -5,6 +5,7 @@ from typing import List
 import modal
 from modal.runner import deploy_app
 
+from transform.create_warehouse import create_data_warehouse
 from utils.logging_config import setup_logging
 from ynab_etl.etl import etl_ynab_data
 
@@ -42,7 +43,7 @@ def s3_sync():
     ),
 )
 def update_dashboards():
-    return
+    create_data_warehouse()
 
 
 if __name__ == '__main__':
@@ -63,14 +64,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     sync_s3 = args.sync_s3
-    update_dashboards = args.update_dashboards
+    update_dashboards_arg = args.update_dashboards
 
     if sync_s3:
         logging.info('Running S3 sync locally.')
         s3_sync.local()
         logging.info('S3 sync completed.')
 
-    if update_dashboards:
+    if update_dashboards_arg:
         logging.info('Updating dashboards locally.')
         update_dashboards.local()
         logging.info('Dashboard update process completed.')
