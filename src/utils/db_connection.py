@@ -21,7 +21,7 @@ class DuckDBConnection:
             f'''
             install httpfs;
             load httpfs;
-            CREATE OR REPLACE SECRET {access_type}_SECRET (
+            CREATE OR REPLACE TEMPORARY SECRET {access_type}_SECRET (
                 TYPE S3,
                 KEY_ID '{os.getenv(s3_access_key_id_var_name)}',
                 SECRET '{os.getenv(s3_secret_access_key_id_var_name)}',
@@ -42,3 +42,6 @@ class DuckDBConnection:
 
     def close(self):
         self.connection.close()
+
+    def df(self, query):
+        return self.connection.query(query).df()

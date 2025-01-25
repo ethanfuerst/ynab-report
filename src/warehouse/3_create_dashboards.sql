@@ -38,7 +38,7 @@ create or replace table yearly_level_dashboard as (
     order by budget_year desc
 );
 
-create or replace table category_level_dashboard as (
+create or replace table yearly_category_level_dashboard as (
     with pre_ordered as (
         select
             category_name
@@ -63,7 +63,7 @@ create or replace table category_level_dashboard as (
         union all
 
         select
-            'HSA amount for reimbursement' as category_name
+            'HSA Amount for Reimbursement' as category_name
             , category_group_name_mapping
             , budget_month
             , -1 * emergency_fund_in_hsa as spend
@@ -74,10 +74,11 @@ create or replace table category_level_dashboard as (
 
     select
         category_name
-        , category_group_name_mapping
-        , budget_month
-        , spend
-        , assigned
+        , category_group_name_mapping as category_group
+        , date_trunc('year', budget_month) as budget_year
+        , sum(spend) as spend
+        , sum(assigned) as assigned
     from pre_ordered
-    order by budget_month desc, category_group_name_mapping asc
+    group by category_name, category_group_name_mapping, budget_year
+    order by budget_year desc, category_group_name_mapping asc
 );

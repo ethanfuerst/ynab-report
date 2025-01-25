@@ -1,3 +1,4 @@
 .env
 __pycache__/
 ynab_report.duckdb
+src/sheets/assets/column_ordering/

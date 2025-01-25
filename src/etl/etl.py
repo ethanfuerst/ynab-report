@@ -43,7 +43,7 @@ def extract_category_groups(
     rows_loaded = load_df_to_s3_table(
         duckdb_con=duckdb_con,
         df=category_groups.reset_index(drop=True),
-        s3_key=f'category-groups/all_data',
+        s3_key=f'category-groups',
         bucket_name=os.getenv('BUCKET_NAME'),
     )
 
@@ -53,22 +53,27 @@ def extract_category_groups(
 def extract_categories(
     budget_data: Dict, duckdb_con: duckdb.DuckDBPyConnection
 ) -> None:
-    rows_loaded = 0
+    dfs = []
 
     for month in budget_data['months']:
         month_date = month['month']
         monthly_categories = pd.DataFrame(month['categories'])
 
         month_date = datetime.strptime(month_date, '%Y-%m-%d')
+        monthly_categories['year'] = month_date.year
+        monthly_categories['month'] = month_date.month
 
-        rows_added = load_df_to_s3_table(
-            duckdb_con=duckdb_con,
-            df=monthly_categories.reset_index(drop=True),
-            s3_key=f'monthly-categories/year={month_date.year}/month={month_date.month}/data',
-            bucket_name=os.getenv('BUCKET_NAME'),
-        )
+        if not monthly_categories.empty:
+            dfs.append(monthly_categories)
 
-        rows_loaded += rows_added
+    df = pd.concat(dfs)
+
+    rows_loaded = load_df_to_s3_table(
+        duckdb_con=duckdb_con,
+        df=df.reset_index(drop=True),
+        s3_key=f'monthly-categories',
+        bucket_name=os.getenv('BUCKET_NAME'),
+    )
 
     logging.info(f'Loaded {rows_loaded} rows')
 
@@ -78,21 +83,12 @@ def extract_transactions(
 ) -> None:
     transactions = pd.DataFrame(budget_data['transactions'])
 
-    rows_loaded = 0
-
-    transactions['date'] = pd.to_datetime(transactions['date'])
-    transactions['year'] = transactions['date'].dt.year
-    transactions['month'] = transactions['date'].dt.month
-
-    for (year, month), group in transactions.groupby(['year', 'month']):
-        rows_added = load_df_to_s3_table(
-            duckdb_con=duckdb_con,
-            df=group.drop(columns=['year', 'month']).reset_index(drop=True),
-            s3_key=f'transactions/year={year}/month={month}/data',
-            bucket_name=os.getenv('BUCKET_NAME'),
-        )
-
-        rows_loaded += rows_added
+    rows_loaded = load_df_to_s3_table(
+        duckdb_con=duckdb_con,
+        df=transactions.reset_index(drop=True),
+        s3_key=f'transactions',
+        bucket_name=os.getenv('BUCKET_NAME'),
+    )
 
     logging.info(f'Loaded {rows_loaded} rows')
 
@@ -105,7 +101,7 @@ def extract_subtransactions(
     rows_loaded = load_df_to_s3_table(
         duckdb_con=duckdb_con,
         df=subtransactions,
-        s3_key=f'subtransactions/all_data',
+        s3_key=f'subtransactions',
         bucket_name=os.getenv('BUCKET_NAME'),
     )
 

@@ -4,10 +4,9 @@ create or replace table raw_category_groups as (
         , name
         , hidden
         , deleted
-        , filename
     from
         read_parquet(
-            's3://$bucket_name/category-groups/*.parquet', filename = true
+            's3://$bucket_name/category-groups.parquet'
         )
 );
 
@@ -36,12 +35,11 @@ create or replace table raw_monthly_categories as (
         , goal_overall_funded
         , goal_overall_left
         , deleted
-        , filename
         , month
         , year
     from
         read_parquet(
-            's3://$bucket_name/monthly-categories/**/*.parquet', filename = true
+            's3://$bucket_name/monthly-categories.parquet'
         )
 );
 
@@ -65,10 +63,9 @@ create or replace table raw_transactions as (
         , import_payee_name_original
         , debt_transaction_type
         , deleted
-        , filename
     from
         read_parquet(
-            's3://$bucket_name/transactions/**/*.parquet', filename = true
+            's3://$bucket_name/transactions.parquet'
         )
 );
 
@@ -82,9 +79,8 @@ create or replace table raw_subtransactions as (
         , category_id
         , transfer_account_id
         , deleted
-        , filename
     from
         read_parquet(
-            's3://$bucket_name/subtransactions/**/*.parquet', filename = true
+            's3://$bucket_name/subtransactions.parquet'
         )
 );

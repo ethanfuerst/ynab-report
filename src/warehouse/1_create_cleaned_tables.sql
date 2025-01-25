@@ -44,7 +44,7 @@ create or replace table transactions as (
     select
         id
         , category_id
-        , epoch_ms(date) as transaction_date
+        , date as transaction_date
         , amount / 1000 as amount
         , memo
         , import_payee_name as payee_name
