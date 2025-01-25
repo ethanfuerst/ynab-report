@@ -4,7 +4,7 @@ import os
 import duckdb
 from pandas import DataFrame
 
-from utils.logging_config import setup_logging
+from src.utils.logging_config import setup_logging
 
 setup_logging()
 

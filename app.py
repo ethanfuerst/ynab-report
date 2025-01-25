@@ -5,9 +5,9 @@ from typing import List
 import modal
 from modal.runner import deploy_app
 
-from transform.create_warehouse import create_data_warehouse
-from utils.logging_config import setup_logging
-from ynab_etl.etl import etl_ynab_data
+from src.etl.etl import etl_ynab_data
+from src.utils.logging_config import setup_logging
+from src.warehouse.create_warehouse import create_data_warehouse
 
 setup_logging()
 

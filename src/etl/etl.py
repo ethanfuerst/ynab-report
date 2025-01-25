@@ -8,8 +8,8 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 
-from utils.db_connection import DuckDBConnection
-from utils.s3_utils import load_df_to_s3_table
+from src.utils.db_connection import DuckDBConnection
+from src.utils.s3_utils import load_df_to_s3_table
 
 load_dotenv()
 
