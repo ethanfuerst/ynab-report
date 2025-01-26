@@ -25,8 +25,13 @@ modal_image = modal.Image.debian_slim(python_version='3.10').poetry_install_from
     secrets=[modal.Secret.from_name('ynab-report-secrets')],
     mounts=[
         modal.Mount.from_local_dir(
-            'src/sheets/assets/', remote_path='/app/src/sheets/assets'
-        )
+            'src/sheets/assets/formatting_configs/',
+            remote_path='/app/src/sheets/assets/formatting_configs/',
+        ),
+        modal.Mount.from_local_dir(
+            'src/sheets/assets/column_ordering/',
+            remote_path='/app/src/sheets/assets/column_ordering/',
+        ),
     ],
     retries=modal.Retries(
         max_retries=3,
