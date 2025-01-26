@@ -5,8 +5,10 @@ from typing import List
 import modal
 from modal.runner import deploy_app
 
-from utils.logging_config import setup_logging
-from ynab_etl.etl import etl_ynab_data
+from src.etl.etl import etl_ynab_data
+from src.sheets.refresh_sheets import refresh_sheets
+from src.utils.logging_config import setup_logging
+from src.warehouse.create_warehouse import create_data_warehouse
 
 setup_logging()
 
@@ -19,30 +21,30 @@ modal_image = modal.Image.debian_slim(python_version='3.10').poetry_install_from
 
 @app.function(
     image=modal_image,
-    schedule=modal.Cron('0 4 * * *'),
+    schedule=modal.Cron('5 5,15,17,21 * * *'),
     secrets=[modal.Secret.from_name('ynab-report-secrets')],
+    mounts=[
+        modal.Mount.from_local_dir(
+            'src/sheets/assets', remote_path='/app/src/sheets/assets'
+        )
+    ],
     retries=modal.Retries(
         max_retries=3,
         backoff_coefficient=1.0,
         initial_delay=60.0,
     ),
 )
-def s3_sync():
-    etl_ynab_data()
+def ynab_report_app(sync_s3: bool = True, update_dashboards: bool = True):
+    if sync_s3:
+        logging.info('Running S3 sync.')
+        etl_ynab_data()
+        logging.info('S3 sync completed.')
 
-
-@app.function(
-    image=modal_image,
-    schedule=modal.Cron('0 5 * * *'),
-    secrets=[modal.Secret.from_name('ynab-report-secrets')],
-    retries=modal.Retries(
-        max_retries=3,
-        backoff_coefficient=1.0,
-        initial_delay=60.0,
-    ),
-)
-def update_dashboards():
-    return
+    if update_dashboards:
+        logging.info('Updating dashboards.')
+        create_data_warehouse()
+        refresh_sheets()
+        logging.info('Dashboard update process completed.')
 
 
 if __name__ == '__main__':
@@ -65,12 +67,6 @@ if __name__ == '__main__':
     sync_s3 = args.sync_s3
     update_dashboards = args.update_dashboards
 
-    if sync_s3:
-        logging.info('Running S3 sync locally.')
-        s3_sync.local()
-        logging.info('S3 sync completed.')
-
-    if update_dashboards:
-        logging.info('Updating dashboards locally.')
-        update_dashboards.local()
-        logging.info('Dashboard update process completed.')
+    logging.info('Running ynab_report_app locally')
+    ynab_report_app.local(sync_s3=sync_s3, update_dashboards=update_dashboards)
+    logging.info('ynab_report_app completed')
