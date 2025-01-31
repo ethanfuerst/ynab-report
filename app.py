@@ -14,8 +14,17 @@ setup_logging()
 
 app = modal.App('ynab-report')
 
-modal_image = modal.Image.debian_slim(python_version='3.10').poetry_install_from_file(
-    poetry_pyproject_toml='pyproject.toml'
+modal_image = (
+    modal.Image.debian_slim(python_version='3.10')
+    .poetry_install_from_file(poetry_pyproject_toml='pyproject.toml')
+    .add_local_dir(
+        'src/sheets/assets/formatting_configs/',
+        remote_path='/app/src/sheets/assets/formatting_configs/',
+    )
+    .add_local_dir(
+        'src/sheets/assets/column_ordering/',
+        remote_path='/app/src/sheets/assets/column_ordering/',
+    )
 )
 
 
@@ -23,16 +32,6 @@ modal_image = modal.Image.debian_slim(python_version='3.10').poetry_install_from
     image=modal_image,
     schedule=modal.Cron('5 8 * * *'),
     secrets=[modal.Secret.from_name('ynab-report-secrets')],
-    mounts=[
-        modal.Mount.from_local_dir(
-            'src/sheets/assets/formatting_configs/',
-            remote_path='/app/src/sheets/assets/formatting_configs/',
-        ),
-        modal.Mount.from_local_dir(
-            'src/sheets/assets/column_ordering/',
-            remote_path='/app/src/sheets/assets/column_ordering/',
-        ),
-    ],
     retries=modal.Retries(
         max_retries=3,
         backoff_coefficient=1.0,
