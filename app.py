@@ -21,7 +21,7 @@ modal_image = modal.Image.debian_slim(python_version='3.10').poetry_install_from
 
 @app.function(
     image=modal_image,
-    schedule=modal.Cron('5 5,15,17,21 * * *'),
+    schedule=modal.Cron('5 8 * * *'),
     secrets=[modal.Secret.from_name('ynab-report-secrets')],
     mounts=[
         modal.Mount.from_local_dir(
