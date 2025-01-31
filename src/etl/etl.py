@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from datetime import datetime
@@ -7,6 +8,7 @@ import duckdb
 import pandas as pd
 import requests
 from dotenv import load_dotenv
+from gspread import service_account_from_dict
 
 from src.utils.db_connection import DuckDBConnection
 from src.utils.s3_utils import load_df_to_s3_table
@@ -108,6 +110,26 @@ def extract_subtransactions(
     logging.info(f'Loaded {rows_loaded} rows')
 
 
+def load_paystubs_from_sheets(duckdb_con: duckdb.DuckDBPyConnection) -> None:
+    credentials_dict = json.loads(os.getenv('GSPREAD_CREDENTIALS').replace('\n', '\\n'))
+    gc = service_account_from_dict(credentials_dict)
+    worksheet = gc.open('Paystubs').worksheet('all_paystubs')
+
+    raw = worksheet.get_all_values()
+    df = pd.DataFrame(data=raw[1:], columns=raw[0]).astype(str)
+
+    logging.info('Loading paystubs to S3 bucket')
+
+    rows_loaded = load_df_to_s3_table(
+        duckdb_con=duckdb_con,
+        df=df,
+        s3_key='raw-paystubs',
+        bucket_name=os.getenv('BUCKET_NAME'),
+    )
+
+    logging.info(f'Loaded {rows_loaded} rows to S3 bucket for raw-paystubs')
+
+
 etl_functions = {
     'category-groups': extract_category_groups,
     'monthly-categories': extract_categories,
@@ -121,8 +143,13 @@ def etl_ynab_data():
 
     duckdb_con = DuckDBConnection(need_write_access=True).get_connection()
 
+    load_paystubs_from_sheets(duckdb_con)
+
     logging.info('Extracting data from endpoints')
     for endpoint, function in etl_functions.items():
         logging.info(f'Extracting {endpoint} data')
         function(budget_data, duckdb_con)
         logging.info(f'Extracted {endpoint} data')
+
+
+# %%

@@ -44,8 +44,8 @@ create or replace table transactions as (
     select
         id
         , category_id
-        , date as transaction_date
-        , amount / 1000 as amount
+        , transaction_date
+        , amount
         , memo
         , import_payee_name as payee_name
         , flag_color
