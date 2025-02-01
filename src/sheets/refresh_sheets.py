@@ -126,7 +126,7 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     worksheet = refresh_sheet_tab(sh, title, sheet_height, 24)
 
-    format_dict = load_format_config(
+    format_dict = load_json_config(
         'src/sheets/assets/formatting_configs/overview_dashboard_format.json'
     )
 
@@ -137,6 +137,12 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
     worksheet.columns_auto_resize(2, 23)
     for column, width in OVERVIEW_COLUMN_WIDTH_MAPPING.items():
         gsf.set_column_width(worksheet, column, width)
+
+    notes_dict = load_json_config(
+        'src/sheets/assets/formatting_configs/overview_notes.json'
+    )
+    worksheet.insert_notes(notes_dict)
+
     logging.info(f'{title} updated')
 
 
@@ -223,7 +229,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         )
         df_to_sheet(df_paycheck, worksheet, 'B2')
 
-        format_dict = load_format_config(
+        format_dict = load_json_config(
             'src/sheets/assets/formatting_configs/yearly_categories_dashboard_format.json'
         )
         apply_format_dict(worksheet, format_dict)
