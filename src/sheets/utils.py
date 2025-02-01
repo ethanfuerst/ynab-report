@@ -65,7 +65,7 @@ def df_to_sheet(
 
 def clean_category_names(df: DataFrame) -> DataFrame:
     df['category_name'] = df['category_name'].apply(
-        lambda x: emoji.replace_emoji(x, replace='').strip()
+        lambda x: emoji.replace_emoji(x, replace='').strip() if x else x
     )
     return df
 

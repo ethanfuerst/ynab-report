@@ -1,37 +1,21 @@
 {
-    "B2": {
-        "_comment": "Income Header",
-        "horizontalAlignment": "LEFT",
-        "textFormat": {
-            "fontSize": 12,
-            "bold": true
-        }
-    },
-    "C2": {
-        "_comment": "Income Amount",
-        "horizontalAlignment": "RIGHT",
-        "numberFormat": {
-            "type": "CURRENCY",
-            "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
-        }
-    },
-    "C4:D4": {
-        "_comment": "Column Headers for Category Groups",
+    "B2:C2": {
+        "_comment": "Column Headers for Paycheck Values",
         "horizontalAlignment": "CENTER",
         "textFormat": {
             "fontSize": 12,
             "bold": true
         }
     },
-    "C5:D": {
-        "_comment": "Category Group Numbers",
+    "C3:C": {
+        "_comment": "Paycheck Values",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
             "type": "CURRENCY",
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "F2:H2": {
+    "E2:F2": {
         "_comment": "Column Headers for Needs",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -39,12 +23,12 @@
             "bold": true
         }
     },
-    "F3:F": {
+    "E3:E": {
         "_comment": "Needs Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "G3:H": {
+    "F3:F": {
         "_comment": "Needs Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
@@ -52,7 +36,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "J2:L2": {
+    "H2:I2": {
         "_comment": "Column Headers for Wants",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -60,12 +44,12 @@
             "bold": true
         }
     },
-    "J3:J": {
+    "H3:H": {
         "_comment": "Wants Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "K3:L": {
+    "I3:I": {
         "_comment": "Wants Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
@@ -73,7 +57,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "N2:P2": {
+    "K2:M2": {
         "_comment": "Column Headers for Savings, Emergency Fund, Investments",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -81,13 +65,34 @@
             "bold": true
         }
     },
-    "N3:N": {
+    "K3:K10": {
         "_comment": "Savings, Emergency Fund, Investments Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "O3:P": {
+    "L3:M10": {
         "_comment": "Savings, Emergency Fund, Investments Numbers",
+        "horizontalAlignment": "RIGHT",
+        "numberFormat": {
+            "type": "CURRENCY",
+            "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
+        }
+    },
+    "K12:M12": {
+        "_comment": "Column Headers for Category Groups",
+        "horizontalAlignment": "CENTER",
+        "textFormat": {
+            "fontSize": 12,
+            "bold": true
+        }
+    },
+    "K13:K18": {
+        "_comment": "Category Group Names",
+        "horizontalAlignment": "LEFT",
+        "hyperlinkDisplayType": "PLAIN_TEXT"
+    },
+    "K13:M18": {
+        "_comment": "Category Group Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
             "type": "CURRENCY",
