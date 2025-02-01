@@ -84,14 +84,79 @@ create or replace table yearly_level_dashboard as (
     order by budget_year desc
 );
 
+create or replace table yearly_paycheck_data as (
+    with pre_un_pivot as (
+        select
+            budget_year
+            , earnings_actual
+            , pre_tax_deductions
+            , taxes
+            , retirement_fund
+            , hsa
+            , post_tax_deductions
+            , total_deductions
+            , net_pay
+            , income_for_reimbursements
+            , misc_income
+            , total_income
+        from yearly_level_dashboard
+    )
+
+    unpivot pre_un_pivot
+    on earnings_actual
+    , pre_tax_deductions
+    , taxes
+    , retirement_fund
+    , hsa
+    , post_tax_deductions
+    , total_deductions
+    , net_pay
+    , income_for_reimbursements
+    , misc_income
+    , total_income
+    into name column_name
+    value amount
+);
+
 create or replace table yearly_category_level_dashboard as (
+    with category_level as (
+        select
+            category_name
+            , category_group_name_mapping as category_group
+            , date_trunc('year', budget_month) as budget_year
+            , sum(activity) as spend
+            , sum(budgeted) as assigned
+        from monthly_level
+        group by category_name, category_group_name_mapping, budget_year
+    )
+
+    , paycheck_level as (
+        select
+            budget_year
+            , column_name as paycheck_col
+            , amount as paycheck_value
+        from yearly_paycheck_data
+    )
+
     select
         category_name
-        , category_group_name_mapping as category_group
-        , date_trunc('year', budget_month) as budget_year
-        , sum(activity) as spend
-        , sum(budgeted) as assigned
-    from monthly_level
-    group by category_name, category_group_name_mapping, budget_year
-    order by budget_year desc, category_group_name_mapping asc
+        , category_group
+        , budget_year
+        , spend
+        , assigned
+        , null as paycheck_col
+        , null as paycheck_value
+    from category_level
+
+    union all
+
+    select
+        null as category_name
+        , null as category_group
+        , budget_year
+        , null as spend
+        , null as assigned
+        , paycheck_col
+        , paycheck_value
+    from paycheck_level
 );

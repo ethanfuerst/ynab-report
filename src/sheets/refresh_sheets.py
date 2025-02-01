@@ -66,20 +66,32 @@ OVERVIEW_COLUMN_TITLES = [
 CATEGORY_DETAIL_COLUMNS = ['Category', 'Assigned', 'Spend']
 YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
     'A': 21,
-    'B': 125,
+    'B': 185,
     'C': 80,
-    'D': 80,
-    'E': 21,
-    'F': 190,
-    'G': 85,
-    'H': 21,
-    'I': 150,
-    'J': 85,
-    'K': 21,
-    'L': 230,
+    'D': 21,
+    'E': 190,
+    'F': 85,
+    'G': 21,
+    'H': 150,
+    'I': 85,
+    'J': 21,
+    'K': 230,
+    'L': 85,
     'M': 85,
-    'N': 85,
-    'O': 21,
+    'N': 21,
+}
+PAYCHECK_COLUMN_MAPPING = {
+    'earnings_actual': 'Pre-Tax Earnings',
+    'pre_tax_deductions': 'Pre-Tax Deductions',
+    'taxes': 'Taxes',
+    'retirement_fund': 'Retirement Fund Contribution',
+    'hsa': 'HSA Contribution',
+    'post_tax_deductions': 'Post-Tax Deductions',
+    'total_deductions': 'Total Deductions',
+    'net_pay': 'Net Pay',
+    'income_for_reimbursements': 'Reimbursed Income',
+    'misc_income': 'Miscellaneous Income',
+    'total_income': 'Total Income (Net to Account)',
 }
 
 
@@ -148,7 +160,15 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         df_year = df[df['budget_year'].dt.year == year]
         title = f'{year} - Categories'
 
-        df_year.columns = ['Category', 'Category Group', 'Year', 'Spend', 'Assigned']
+        df_year.columns = [
+            'Category',
+            'Category Group',
+            'Year',
+            'Spend',
+            'Assigned',
+            'Paycheck Column',
+            'Paycheck Value',
+        ]
 
         df_needs = df_year[df_year['Category Group'] == 'Needs'][['Category', 'Spend']]
         df_wants = df_year[df_year['Category Group'] == 'Wants'][['Category', 'Spend']]
@@ -158,7 +178,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             )
         ][['Category', 'Assigned', 'Spend']]
 
-        worksheet = refresh_sheet_tab(sh, title, sheet_height, 15)
+        worksheet = refresh_sheet_tab(sh, title, sheet_height, 14)
 
         df_needs = sort_columns(df_needs, 'Category', column_orders['needs'])
         df_wants = sort_columns(df_wants, 'Category', column_orders['wants'])
@@ -167,35 +187,42 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         )
 
         df_needs.columns = ['Needs', 'Spend']
-        df_to_sheet(df_needs, worksheet, 'F2')
+        df_to_sheet(df_needs, worksheet, 'E2')
 
         df_wants.columns = ['Wants', 'Spend']
-        df_to_sheet(df_wants, worksheet, 'I2')
+        df_to_sheet(df_wants, worksheet, 'H2')
 
         df_savings_emergency_investments.columns = ['Other', 'Assigned', 'Spend']
-        df_to_sheet(df_savings_emergency_investments, worksheet, 'L2')
+        df_to_sheet(df_savings_emergency_investments, worksheet, 'K2')
 
         df_category_groups = (
             df_year.groupby('Category Group')[['Assigned', 'Spend']].sum().reset_index()
         )
 
-        df_income = df_category_groups[
-            df_category_groups['Category Group'] == 'Income'
-        ][['Category Group', 'Spend']]
         df_other = df_category_groups[
             ~df_category_groups['Category Group'].isin(
                 ['Income', 'Credit Card Payments']
             )
         ]
 
-        df_income.columns = ['', '']
-        df_to_sheet(df_income, worksheet, 'B1')
-
         df_other = sort_columns(
             df_other, 'Category Group', column_orders['category_groups']
         )
-        df_other.columns = ['', 'Assigned', 'Spend']
-        df_to_sheet(df_other, worksheet, 'B4')
+        df_other.columns = ['Category Group', 'Assigned', 'Spend']
+        df_to_sheet(df_other, worksheet, 'K12')
+
+        df_paycheck = df_year[df_year['Paycheck Column'].notna()][
+            ['Paycheck Column', 'Paycheck Value']
+        ]
+        df_paycheck.columns = ['Paycheck Value', 'Amount']
+        df_paycheck['Paycheck Value'] = df_paycheck['Paycheck Value'].map(
+            PAYCHECK_COLUMN_MAPPING
+        )
+
+        df_paycheck = sort_columns(
+            df_paycheck, 'Paycheck Value', column_orders['paycheck']
+        )
+        df_to_sheet(df_paycheck, worksheet, 'B2')
 
         format_dict = load_format_config(
             'src/sheets/assets/formatting_configs/yearly_categories_dashboard_format.json'
