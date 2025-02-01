@@ -72,16 +72,14 @@ YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
     'E': 21,
     'F': 190,
     'G': 85,
-    'H': 85,
-    'I': 21,
-    'J': 150,
-    'K': 85,
-    'L': 85,
-    'M': 21,
-    'N': 202,
-    'O': 85,
-    'P': 85,
-    'Q': 21,
+    'H': 21,
+    'I': 150,
+    'J': 85,
+    'K': 21,
+    'L': 230,
+    'M': 85,
+    'N': 85,
+    'O': 21,
 }
 
 
@@ -152,17 +150,15 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
 
         df_year.columns = ['Category', 'Category Group', 'Year', 'Spend', 'Assigned']
 
-        df_needs = df_year[df_year['Category Group'] == 'Needs'][
-            CATEGORY_DETAIL_COLUMNS
-        ]
-        df_wants = df_year[df_year['Category Group'] == 'Wants'][
-            CATEGORY_DETAIL_COLUMNS
-        ]
+        df_needs = df_year[df_year['Category Group'] == 'Needs'][['Category', 'Spend']]
+        df_wants = df_year[df_year['Category Group'] == 'Wants'][['Category', 'Spend']]
         df_savings_emergency_investments = df_year[
-            df_year['Category Group'].isin(['Savings', 'Emergency Fund', 'Investments'])
-        ][CATEGORY_DETAIL_COLUMNS]
+            df_year['Category Group'].isin(
+                ['Savings', 'Emergency Fund', 'Investments', 'Net Zero Expenses']
+            )
+        ][['Category', 'Assigned', 'Spend']]
 
-        worksheet = refresh_sheet_tab(sh, title, sheet_height, 17)
+        worksheet = refresh_sheet_tab(sh, title, sheet_height, 15)
 
         df_needs = sort_columns(df_needs, 'Category', column_orders['needs'])
         df_wants = sort_columns(df_wants, 'Category', column_orders['wants'])
@@ -170,14 +166,14 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             df_savings_emergency_investments, 'Category', column_orders['other']
         )
 
-        df_needs.columns = ['Needs', 'Assigned', 'Spend']
+        df_needs.columns = ['Needs', 'Spend']
         df_to_sheet(df_needs, worksheet, 'F2')
 
-        df_wants.columns = ['Wants', 'Assigned', 'Spend']
-        df_to_sheet(df_wants, worksheet, 'J2')
+        df_wants.columns = ['Wants', 'Spend']
+        df_to_sheet(df_wants, worksheet, 'I2')
 
         df_savings_emergency_investments.columns = ['Other', 'Assigned', 'Spend']
-        df_to_sheet(df_savings_emergency_investments, worksheet, 'N2')
+        df_to_sheet(df_savings_emergency_investments, worksheet, 'L2')
 
         df_category_groups = (
             df_year.groupby('Category Group')[['Assigned', 'Spend']].sum().reset_index()

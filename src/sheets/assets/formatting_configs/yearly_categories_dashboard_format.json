@@ -31,7 +31,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "F2:H2": {
+    "F2:G2": {
         "_comment": "Column Headers for Needs",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -44,7 +44,7 @@
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "G3:H": {
+    "G3:G": {
         "_comment": "Needs Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
@@ -52,7 +52,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "J2:L2": {
+    "I2:J2": {
         "_comment": "Column Headers for Wants",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -60,12 +60,12 @@
             "bold": true
         }
     },
-    "J3:J": {
+    "I3:I": {
         "_comment": "Wants Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "K3:L": {
+    "J3:J": {
         "_comment": "Wants Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
@@ -73,7 +73,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "N2:P2": {
+    "K2:N2": {
         "_comment": "Column Headers for Savings, Emergency Fund, Investments",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -81,12 +81,12 @@
             "bold": true
         }
     },
-    "N3:N": {
+    "L3:L": {
         "_comment": "Savings, Emergency Fund, Investments Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "O3:P": {
+    "M3:N": {
         "_comment": "Savings, Emergency Fund, Investments Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {

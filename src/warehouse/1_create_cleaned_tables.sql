@@ -44,7 +44,7 @@ create or replace table transactions as (
     select
         id
         , category_id
-        , transaction_date
+        , strptime(transaction_date, '%Y-%m-%d') as transaction_date
         , amount
         , memo
         , import_payee_name as payee_name
