@@ -155,6 +155,10 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
     with open('src/sheets/assets/column_ordering/column_orders.json', 'r') as f:
         column_orders = json.load(f)
 
+    notes_dict = load_json_config(
+        'src/sheets/assets/formatting_configs/yearly_categories_notes.json'
+    )
+
     logging.info(
         f'Updating yearly categories dashboards for years: {", ".join(map(str, years))}'
     )
@@ -237,6 +241,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         for column, column_width in YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING.items():
             gsf.set_column_width(worksheet, column, column_width)
 
+        worksheet.insert_notes(notes_dict)
         logging.info(f'{year} - Categories updated')
 
 

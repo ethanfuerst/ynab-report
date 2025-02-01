@@ -1,0 +1,15 @@
+{
+    "B3": "Gross Earnings",
+    "B4": "FSA and Medical",
+    "B5": "Medicare, Federal, State, City, NYPFL, Disability, and Social Security",
+    "B6": "Pre Tax or Roth",
+    "B7": "HSA Contribution",
+    "B8": "Critical Illness, AD & D, Long Term Disability",
+    "B9": "Pre-Tax Deductions + Taxes + HSA Contribution + Post-Tax Deductions",
+    "B10": "Gross Earnings - Total Deductions",
+    "B11": "Income for Items Reimbursed by Employer. Not counted in Total Income because the spend is categorized as a net zero expense category.",
+    "B12": "Any income not from an employer. Credit Card Cash Back, Selling items, gifts, etc.",
+    "B13": "Net Pay + Miscellaneous Income",
+    "K17": "Investment categories equal 0 at the end of the month and all money budgeted is invested.",
+    "K8": "Amount spent on items that can be reimbursed by the HSA, but have not been reimbursed yet. This money can be used for emergency expenses as a last resort."
+}
