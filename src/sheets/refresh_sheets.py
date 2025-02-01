@@ -16,32 +16,52 @@ load_dotenv()
 
 OVERVIEW_COLUMN_WIDTH_MAPPING = {
     'A': 21,
-    'B': 55,
-    'C': 74,
-    'D': 83,
-    'E': 83,
-    'F': 75,
-    'G': 99,
-    'H': 79,
-    'I': 123,
-    'J': 100,
-    'K': 103,
-    'L': 83,
-    'M': 85,
-    'N': 21,
+    'B': 60,
+    'C': 85,
+    'D': 100,
+    'E': 85,
+    'F': 110,
+    'G': 110,
+    'H': 100,
+    'I': 100,
+    'J': 80,
+    'K': 100,
+    'L': 120,
+    'M': 120,
+    'N': 85,
+    'O': 85,
+    'P': 85,
+    'Q': 95,
+    'R': 75,
+    'S': 100,
+    'T': 100,
+    'U': 95,
+    'V': 85,
+    'W': 80,
+    'X': 21,
 }
 OVERVIEW_COLUMN_TITLES = [
-    'Income',
+    'Pre-Tax Earnings',
+    'Pre-Tax Deductions',
+    'Taxes',
+    'Retirement Fund Contribution',
+    'HSA Contribution',
+    'Post-Tax Deductions',
+    'Total Deductions',
+    'Net Pay',
+    'Reimbursed Income',
+    'Miscellaneous Income',
+    'Total Income (Net to Account)',
     'Needs Spend',
     'Wants Spend',
     'Savings Spend',
     'Emergency Fund Spend',
-    'Savings Assigned',
-    'Emergency Fund Assigned',
-    'Investments Assigned',
+    'Savings Saved',
+    'Emergency Fund Saved',
+    'Investments Saved',
     'Emergency Fund in HSA',
-    'Spent',
-    'Difference',
+    'Total Spend',
+    'Net Income',
 ]
 CATEGORY_DETAIL_COLUMNS = ['Category', 'Assigned', 'Spend']
 YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
@@ -95,7 +115,7 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     sheet_height = len(df) + 3
 
-    worksheet = refresh_sheet_tab(sh, title, sheet_height, 14)
+    worksheet = refresh_sheet_tab(sh, title, sheet_height, 24)
 
     format_dict = load_format_config(
         'src/sheets/assets/formatting_configs/overview_dashboard_format.json'
@@ -103,9 +123,9 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     df_to_sheet(df, worksheet, 'B2', format_dict)
 
-    worksheet.format('B2:M2', format_dict['B2:M2'])
+    worksheet.format('B2:W2', format_dict['B2:W2'])
 
-    worksheet.columns_auto_resize(2, 13)
+    worksheet.columns_auto_resize(2, 23)
     for column, width in OVERVIEW_COLUMN_WIDTH_MAPPING.items():
         gsf.set_column_width(worksheet, column, width)
     logging.info(f'{title} updated')

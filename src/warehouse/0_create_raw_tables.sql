@@ -46,7 +46,7 @@ create or replace table raw_monthly_categories as (
 create or replace table raw_transactions as (
     select
         id
-        , strptime(date, '%Y-%m-%d') as transaction_date
+        , date as transaction_date
         , amount / 1000 as amount
         , memo
         , cleared
@@ -96,14 +96,15 @@ create or replace table raw_paystubs as (
             if(pay_period_end_date = '', null, pay_period_end_date), '%m/%d/%Y'
         ) as pay_period_end_date
         , strptime(if(pay_date = '', null, pay_date), '%m/%d/%Y') as pay_date
-        , coalesce(round(try_cast(net_pay as float), 2), 0) as net_pay
+        , coalesce(round(try_cast(net_pay as float), 2), 0)
+            as net_pay_on_sheet_calc
         , coalesce(round(try_cast(earnings_total as float), 2), 0)
-            as earnings_total
+            as earnings_total_on_sheet_calc
         , coalesce(round(try_cast(pre_tax_deductions as float), 2), 0)
-            as pre_tax_deductions
-        , coalesce(round(try_cast(taxes as float), 2), 0) as taxes
+            as pre_tax_deductions_on_sheet_calc
+        , coalesce(round(try_cast(taxes as float), 2), 0) as taxes_on_sheet_calc
         , coalesce(round(try_cast(post_tax_deductions as float), 2), 0)
-            as post_tax_deductions
+            as post_tax_deductions_on_sheet_calc
         , coalesce(round(try_cast(earnings_salary as float), 2), 0)
             as earnings_salary
         , coalesce(round(try_cast(earnings_bonus as float), 2), 0)
@@ -156,6 +157,3 @@ create or replace table raw_paystubs as (
             's3://$bucket_name/raw-paystubs.parquet'
         )
 );
-
--- do I split out reimbursements? I think so - put that in a separate table
--- earnings misc - is that earnings? is that something else?

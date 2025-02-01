@@ -55,6 +55,22 @@ create or replace table final_monthly_category_groups as (
         on monthly_categories.category_group_id = category_groups.id
 );
 
+create or replace table monthly_paystubs as (
+    select
+        date_trunc('month', pay_date) as pay_month
+        , sum(round(earnings_actual, 2)) as earnings_actual
+        , sum(round(pre_tax_deductions, 2)) as pre_tax_deductions
+        , sum(round(retirement_fund, 2)) as retirement_fund
+        , sum(round(hsa, 2)) as hsa
+        , sum(round(taxes, 2)) as taxes
+        , sum(round(post_tax_deductions, 2)) as post_tax_deductions
+        , sum(round(deductions, 2)) as deductions
+        , sum(round(earnings_actual + deductions, 2)) as net_pay
+        , sum(round(income_for_reimbursements, 2)) as income_for_reimbursements
+    from paystubs
+    group by pay_month
+);
+
 create or replace table monthly_level as (
     with all_transactions as (
         select
@@ -108,8 +124,7 @@ create or replace table monthly_level as (
                 sum(
                     case
                         when
-                            memo like '%(to be reimbursed by HSA)%'
-                            and category_group_name_mapping = 'Emergency Fund'
+                            category_name like '%HSA%'
                             then -1 * amount
                         else 0
                     end
@@ -292,4 +307,23 @@ create or replace table monthly_level as (
     order by
         category_monthly_spine.budget_month desc
         , category_monthly_spine.category_id desc
+);
+
+create or replace table monthly_transactions as (
+    select
+        budget_month
+        , sum(income) as income
+        , sum(needs_spend) as needs_spend
+        , sum(wants_spend) as wants_spend
+        , sum(savings_spend) as savings_spend
+        , sum(emergency_fund_spend) as emergency_fund_spend
+        , sum(savings_assigned) as savings_assigned
+        , sum(emergency_fund_assigned) as emergency_fund_assigned
+        , sum(investments_assigned) as investments_assigned
+        , sum(emergency_fund_in_hsa) as emergency_fund_in_hsa
+        , sum(needs_spend + wants_spend + savings_spend + emergency_fund_spend)
+            as spent
+    from monthly_level
+    group by budget_month
+    order by budget_month desc
 );
