@@ -158,4 +158,28 @@ create or replace table yearly_category_level_dashboard as (
         , paycheck_col
         , paycheck_value
     from paycheck_level
+
+    union all
+
+    select
+        null as category_name
+        , null as category_group
+        , budget_year
+        , null as spend
+        , null as assigned
+        , 'total_spend' as paycheck_col
+        , spent as paycheck_value
+    from yearly_level_dashboard
+
+    union all
+
+    select
+        null as category_name
+        , null as category_group
+        , budget_year
+        , null as spend
+        , null as assigned
+        , 'net_income' as paycheck_col
+        , difference as paycheck_value
+    from yearly_level_dashboard
 );

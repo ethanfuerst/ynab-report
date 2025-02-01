@@ -91,6 +91,8 @@ PAYCHECK_COLUMN_MAPPING = {
     'income_for_reimbursements': 'Reimbursed Income',
     'misc_income': 'Miscellaneous Income',
     'total_income': 'Total Income (Net to Account)',
+    'total_spend': 'Total Spend',
+    'net_income': 'Net Income',
 }
 
 
