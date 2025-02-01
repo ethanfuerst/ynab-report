@@ -150,6 +150,3 @@ def etl_ynab_data():
         logging.info(f'Extracting {endpoint} data')
         function(budget_data, duckdb_con)
         logging.info(f'Extracted {endpoint} data')
-
-
-# %%

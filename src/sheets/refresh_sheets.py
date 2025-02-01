@@ -63,7 +63,6 @@ OVERVIEW_COLUMN_TITLES = [
     'Total Spend',
     'Net Income',
 ]
-CATEGORY_DETAIL_COLUMNS = ['Category', 'Assigned', 'Spend']
 YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
     'A': 21,
     'B': 185,
