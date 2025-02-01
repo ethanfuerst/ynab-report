@@ -25,7 +25,7 @@ def remove_comments(obj: Union[Dict, List]) -> Union[Dict, List]:
         return obj
 
 
-def load_format_config(file_path: str) -> Dict[str, Any]:
+def load_json_config(file_path: str) -> Dict[str, Any]:
     with open(file_path, 'r') as file:
         config = json.load(file)
     return remove_comments(config)

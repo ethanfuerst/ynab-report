@@ -18,8 +18,7 @@ create or replace table monthly_level_dashboard as (
             , 0
         ) as misc_income
         , coalesce(
-            coalesce(income_for_reimbursements, 0)
-            + coalesce(net_pay, 0)
+            coalesce(net_pay, 0)
             + coalesce(misc_income, 0)
             , 0
         ) as total_income
