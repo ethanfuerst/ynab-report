@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 
 import gspread_formatting as gsf
 from dotenv import load_dotenv
@@ -110,6 +111,12 @@ def refresh_sheet_tab(
     return worksheet
 
 
+def add_last_updated_cell(worksheet: Worksheet, cell: str = 'B1') -> None:
+    worksheet.update_acell(
+        cell, 'Last Updated: ' + datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+    )
+
+
 def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
     title = f'Overview - {grain.capitalize()}'
     logging.info(f'Updating {title}')
@@ -144,6 +151,8 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
         'src/sheets/assets/formatting_configs/overview_notes.json'
     )
     worksheet.insert_notes(notes_dict)
+
+    add_last_updated_cell(worksheet)
 
     logging.info(f'{title} updated')
 
@@ -244,10 +253,28 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             gsf.set_column_width(worksheet, column, column_width)
 
         worksheet.insert_notes(notes_dict)
+        add_last_updated_cell(worksheet)
         logging.info(f'{year} - Categories updated')
 
 
+def check_data_tests() -> bool:
+    duckdb_con = DuckDBConnection(need_write_access=False)
+    df = duckdb_con.df(
+        '''
+    select * from monthly_level
+    where (investments_balance != 0 or net_zero_balance != 0)
+    and budget_month != (select max(budget_month) from monthly_level)
+    '''
+    )
+
+    return len(df) == 0
+
+
 def refresh_sheets() -> None:
+    if not check_data_tests():
+        logging.error('Data tests failed. Refreshing sheets aborted.')
+        return
+
     credentials_dict = json.loads(os.getenv('GSPREAD_CREDENTIALS').replace('\n', '\\n'))
     gc = service_account_from_dict(credentials_dict)
     sh = gc.open('Spending Dashboard')

@@ -236,6 +236,14 @@ create or replace table monthly_level as (
                     else 0
                 end
             ) as investments_balance
+            , sum(
+                case
+                    when
+                        category_group_name_mapping = 'Net Zero Expenses'
+                        then balance
+                    else 0
+                end
+            ) as net_zero_balance
         from final_monthly_category_groups
         group by
             budget_month
@@ -292,6 +300,7 @@ create or replace table monthly_level as (
         , coalesce(monthly_budgeted.savings_balance, 0) as savings_balance
         , coalesce(monthly_budgeted.investments_balance, 0)
             as investments_balance
+        , coalesce(monthly_budgeted.net_zero_balance, 0) as net_zero_balance
     from category_monthly_spine
     left join monthly_transactions
         on
