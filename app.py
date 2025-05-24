@@ -38,7 +38,11 @@ modal_image = (
         initial_delay=60.0,
     ),
 )
-def ynab_report_app(sync_s3: bool = True, update_dashboards: bool = True):
+def ynab_report_app(
+    sync_s3: bool = True,
+    update_dashboards: bool = True,
+    is_local_run: bool = False,
+):
     if sync_s3:
         logging.info('Running S3 sync.')
         etl_ynab_data()
@@ -46,7 +50,7 @@ def ynab_report_app(sync_s3: bool = True, update_dashboards: bool = True):
 
     if update_dashboards:
         logging.info('Updating dashboards.')
-        create_data_warehouse()
+        create_data_warehouse(is_local_run=is_local_run)
         refresh_sheets()
         logging.info('Dashboard update process completed.')
 
@@ -72,5 +76,9 @@ if __name__ == '__main__':
     update_dashboards = args.update_dashboards
 
     logging.info('Running ynab_report_app locally')
-    ynab_report_app.local(sync_s3=sync_s3, update_dashboards=update_dashboards)
+    ynab_report_app.local(
+        sync_s3=sync_s3,
+        update_dashboards=update_dashboards,
+        is_local_run=True,
+    )
     logging.info('ynab_report_app completed')
