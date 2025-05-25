@@ -1,4 +1,9 @@
 .env
 __pycache__/
-ynab_report.duckdb
 src/sheets/assets/column_ordering/
+.vscode/
+src/warehouse/sqlmesh_project/logs/
+src/warehouse/sqlmesh_project/.cache/
+logs/
+*.duckdb
+*.duckdb.wal

@@ -21,4 +21,4 @@ select
     , emergency_fund_in_hsa
     , spent
     , difference
-from ynab_report.yearly_level_dashboard
+from ynab_report.dashboards.yearly_level
