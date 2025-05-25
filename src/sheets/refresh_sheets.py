@@ -123,7 +123,7 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     column_label = grain.capitalize().replace('ly', '')
 
-    df = get_df_from_table(f'{grain}_level_dashboard')
+    df = get_df_from_table(f'dashboards.{grain}_level')
 
     df.columns = [column_label] + OVERVIEW_COLUMN_TITLES
 
@@ -158,7 +158,7 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
 
 def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
-    df = get_df_from_table('yearly_category_level_dashboard')
+    df = get_df_from_table('dashboards.yearly_category_level')
     years = sorted(to_datetime(df['budget_year']).dt.year.unique(), reverse=True)
     sheet_height = int(df.groupby(['category_group', 'budget_year']).size().max()) + 3
 
@@ -261,9 +261,9 @@ def check_data_tests() -> bool:
     duckdb_con = DuckDBConnection(need_write_access=False)
     df = duckdb_con.df(
         '''
-    select * from monthly_level
+    select * from combined.monthly_level
     where (investments_balance != 0 or net_zero_balance != 0)
-    and budget_month != (select max(budget_month) from monthly_level)
+    and budget_month != (select max(budget_month) from combined.monthly_level)
     '''
     )
 
