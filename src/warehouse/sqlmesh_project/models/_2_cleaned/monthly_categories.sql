@@ -13,3 +13,6 @@ select
     , balance / 1000 as balance
     , activity / 1000 as activity
 from raw.monthly_categories
+order by
+    budget_month desc
+    , name desc

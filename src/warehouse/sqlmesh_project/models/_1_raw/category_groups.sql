@@ -9,4 +9,4 @@ select
     , name
     , hidden
     , deleted
-from @get_s3_table_path('category-groups')
+from @get_s3_parquet_path('category-groups')
