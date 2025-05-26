@@ -32,12 +32,12 @@ with all_transactions as (
 
 select
     transactions_int.id
+    , transactions_int.transaction_date
     , categories.id as category_id
     , categories.category_group_id
     , categories.name as category_name
-    , transactions_int.amount
-    , transactions_int.transaction_date
     , category_groups.category_group_name_mapping
+    , transactions_int.amount
     , transactions_int.memo
 from transactions_int as transactions_int
 left join cleaned.categories as categories

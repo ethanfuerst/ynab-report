@@ -6,8 +6,8 @@ MODEL (
 
 select
     id
-    , date as transaction_date
-    , amount / 1000 as amount
+    , date
+    , amount
     , memo
     , cleared
     , approved
@@ -23,4 +23,4 @@ select
     , import_payee_name_original
     , debt_transaction_type
     , deleted
-from @get_s3_table_path('transactions')
+from @get_s3_parquet_path('transactions')

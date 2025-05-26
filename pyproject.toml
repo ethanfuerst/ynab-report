@@ -8,7 +8,6 @@ packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-ynab = "^1.0.1"
 poetry-dotenv-plugin = "^0.2.0"
 certifi = "^2024.12.14"
 urllib3 = "^2.3.0"
@@ -19,7 +18,7 @@ sqlfluff = "^3.3.0"
 gspread = "^6.1.4"
 gspread-formatting = "^1.2.0"
 emoji = "^2.14.1"
-sqlmesh = "^0.186.1"
+sqlmesh = {extras = ["web"], version = "^0.186.1"}
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"

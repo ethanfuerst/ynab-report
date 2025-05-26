@@ -33,5 +33,5 @@ select
     , sum(monthly_level_dashboard.spent) as spent
     , sum(monthly_level_dashboard.difference) as difference
 from dashboards.monthly_level as monthly_level_dashboard
-group by budget_year
+group by 1
 order by budget_year desc

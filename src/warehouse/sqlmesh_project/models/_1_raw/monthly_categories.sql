@@ -30,4 +30,4 @@ select
     , deleted
     , month
     , year
-from @get_s3_table_path('monthly-categories')
+from @get_s3_parquet_path('monthly-categories')

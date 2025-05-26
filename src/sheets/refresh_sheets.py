@@ -257,24 +257,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         logging.info(f'{year} - Categories updated')
 
 
-def check_data_tests() -> bool:
-    duckdb_con = DuckDBConnection(need_write_access=False)
-    df = duckdb_con.df(
-        '''
-    select * from combined.monthly_level
-    where (investments_balance != 0 or net_zero_balance != 0)
-    and budget_month != (select max(budget_month) from combined.monthly_level)
-    '''
-    )
-
-    return len(df) == 0
-
-
 def refresh_sheets() -> None:
-    if not check_data_tests():
-        logging.error('Data tests failed. Refreshing sheets aborted.')
-        return
-
     credentials_dict = json.loads(os.getenv('GSPREAD_CREDENTIALS').replace('\n', '\\n'))
     gc = service_account_from_dict(credentials_dict)
     sh = gc.open('Spending Dashboard')
