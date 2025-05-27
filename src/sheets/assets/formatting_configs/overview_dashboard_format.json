@@ -1,5 +1,5 @@
 {
-    "B2:W2": {
+    "B2:Y2": {
         "_comment": "Column Titles",
         "horizontalAlignment": "CENTER",
         "wrapStrategy": "WRAP",
@@ -16,7 +16,7 @@
             "pattern": "MM/yyyy"
         }
     },
-    "C3:W": {
+    "C3:Y": {
         "_comment": "All Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {

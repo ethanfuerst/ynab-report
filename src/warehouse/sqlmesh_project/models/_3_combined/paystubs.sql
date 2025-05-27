@@ -15,5 +15,7 @@ select
     , round(deductions, 2) as deductions
     , round(earnings_actual + deductions, 2) as net_pay
     , round(income_for_reimbursements, 2) as income_for_reimbursements
+    , round(salary, 2) as salary
+    , round(bonus, 2) as bonus
 from cleaned.paystubs
 order by pay_date desc

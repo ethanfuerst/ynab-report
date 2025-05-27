@@ -7,6 +7,8 @@ MODEL (
 select
     date_trunc('year', monthly_level_dashboard.budget_month) as budget_year
     , sum(monthly_level_dashboard.earnings_actual) as earnings_actual
+    , sum(monthly_level_dashboard.salary) as salary
+    , sum(monthly_level_dashboard.bonus) as bonus
     , sum(monthly_level_dashboard.pre_tax_deductions) as pre_tax_deductions
     , sum(monthly_level_dashboard.taxes) as taxes
     , sum(monthly_level_dashboard.retirement_fund) as retirement_fund

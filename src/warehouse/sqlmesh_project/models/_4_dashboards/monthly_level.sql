@@ -43,6 +43,8 @@ with monthly_transactions as (
     select
         date_trunc('month', pay_date) as pay_month
         , sum(earnings_actual) as earnings_actual
+        , sum(salary) as salary
+        , sum(bonus) as bonus
         , sum(pre_tax_deductions) as pre_tax_deductions
         , sum(retirement_fund) as retirement_fund
         , sum(hsa) as hsa
@@ -81,6 +83,8 @@ with monthly_transactions as (
 select
     monthly_transactions.budget_month
     , coalesce(monthly_paystubs.earnings_actual, 0) as earnings_actual
+    , coalesce(monthly_paystubs.salary, 0) as salary
+    , coalesce(monthly_paystubs.bonus, 0) as bonus
     , coalesce(monthly_paystubs.pre_tax_deductions, 0) as pre_tax_deductions
     , coalesce(monthly_paystubs.taxes, 0) as taxes
     , coalesce(monthly_paystubs.retirement_fund, 0) as retirement_fund

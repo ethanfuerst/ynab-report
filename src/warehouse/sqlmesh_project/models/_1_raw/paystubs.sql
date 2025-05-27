@@ -6,6 +6,7 @@ MODEL (
 
 select
     file_name
+    , employer
     , pay_period_start_date
     , pay_period_end_date
     , pay_date
