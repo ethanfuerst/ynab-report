@@ -39,8 +39,16 @@ from monthly_level_dashboard
 ```sql all_income
 select
     budget_month,
-    'Pre Tax Earnings' as income_type,
-    earnings_actual as income_amount,
+    'Salary' as income_type,
+    salary as income_amount,
+from ynab_report.monthly_level_dashboard
+
+union all
+
+select
+    budget_month,
+    'Bonus' as income_type,
+    bonus as income_amount,
 from ynab_report.monthly_level_dashboard
 
 union all

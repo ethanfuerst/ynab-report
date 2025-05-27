@@ -7,6 +7,7 @@ MODEL (
 with cleaned_paystubs_int as (
     select
         file_name
+        , employer
         , @try_strip_date(pay_period_start_date) as pay_period_start_date
         , @try_strip_date(pay_period_end_date) as pay_period_end_date
         , @try_strip_date(pay_date) as pay_date
@@ -45,6 +46,7 @@ with cleaned_paystubs_int as (
 
 select
     pay_date
+    , employer
     , round(
         earnings_salary
         + earnings_bonus
@@ -52,6 +54,8 @@ select
         + earnings_severance
         , 2
     ) as earnings_actual
+    , round(earnings_salary, 2) as salary
+    , round(earnings_bonus + earnings_pto_payout + earnings_severance, 2) as bonus
     , -1 * round(pre_tax_fsa + pre_tax_medical, 2) as pre_tax_deductions
     , -1 * round(post_tax_roth + pre_tax_401k, 2) as retirement_fund
     , -1 * round(pre_tax_hsa, 2) as hsa

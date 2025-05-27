@@ -19,30 +19,34 @@ OVERVIEW_COLUMN_WIDTH_MAPPING = {
     'A': 21,
     'B': 60,
     'C': 85,
-    'D': 100,
-    'E': 85,
-    'F': 110,
-    'G': 110,
-    'H': 100,
-    'I': 100,
-    'J': 80,
+    'D': 82,
+    'E': 82,
+    'F': 100,
+    'G': 85,
+    'H': 110,
+    'I': 110,
+    'J': 100,
     'K': 100,
-    'L': 120,
-    'M': 120,
-    'N': 85,
-    'O': 85,
+    'L': 80,
+    'M': 100,
+    'N': 120,
+    'O': 120,
     'P': 85,
-    'Q': 95,
-    'R': 75,
-    'S': 100,
-    'T': 100,
-    'U': 95,
-    'V': 85,
-    'W': 80,
-    'X': 21,
+    'Q': 85,
+    'R': 85,
+    'S': 95,
+    'T': 75,
+    'U': 100,
+    'V': 100,
+    'W': 95,
+    'X': 85,
+    'Y': 80,
+    'Z': 21,
 }
 OVERVIEW_COLUMN_TITLES = [
     'Pre-Tax Earnings',
+    'Salary',
+    'Bonus',
     'Pre-Tax Deductions',
     'Taxes',
     'Retirement Fund Contribution',
@@ -82,6 +86,8 @@ YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
 }
 PAYCHECK_COLUMN_MAPPING = {
     'earnings_actual': 'Pre-Tax Earnings',
+    'salary': 'Salary',
+    'bonus': 'Bonus',
     'pre_tax_deductions': 'Pre-Tax Deductions',
     'taxes': 'Taxes',
     'retirement_fund': 'Retirement Fund Contribution',
@@ -132,8 +138,9 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
     )
 
     sheet_height = len(df) + 3
+    sheet_width = len(df.columns) + 2
 
-    worksheet = refresh_sheet_tab(sh, title, sheet_height, 24)
+    worksheet = refresh_sheet_tab(sh, title, sheet_height, sheet_width)
 
     format_dict = load_json_config(
         'src/sheets/assets/formatting_configs/overview_dashboard_format.json'
@@ -141,9 +148,9 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     df_to_sheet(df, worksheet, 'B2', format_dict)
 
-    worksheet.format('B2:W2', format_dict['B2:W2'])
+    worksheet.format('B2:Y2', format_dict['B2:Y2'])
 
-    worksheet.columns_auto_resize(2, 23)
+    worksheet.columns_auto_resize(2, sheet_width)
     for column, width in OVERVIEW_COLUMN_WIDTH_MAPPING.items():
         gsf.set_column_width(worksheet, column, width)
 

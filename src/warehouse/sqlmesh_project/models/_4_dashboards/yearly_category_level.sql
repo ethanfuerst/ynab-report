@@ -22,6 +22,8 @@ with category_level as (
     select
         budget_year
         , earnings_actual
+        , salary
+        , bonus
         , pre_tax_deductions
         , taxes
         , retirement_fund
@@ -37,6 +39,10 @@ with category_level as (
 
 , yearly_paychecks_pivot as (
     select budget_year, 'earnings_actual' as column_name, earnings_actual as amount from pre_un_pivot
+    union all
+    select budget_year, 'salary', salary from pre_un_pivot
+    union all
+    select budget_year, 'bonus', bonus from pre_un_pivot
     union all
     select budget_year, 'pre_tax_deductions', pre_tax_deductions from pre_un_pivot
     union all
