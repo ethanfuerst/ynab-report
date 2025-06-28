@@ -6,6 +6,7 @@ MODEL (
 
 select
     id
+    , account_id
     , category_id
     , strptime(date, '%Y-%m-%d') as transaction_date
     , amount / 1000 as amount

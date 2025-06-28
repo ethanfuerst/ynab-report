@@ -130,11 +130,25 @@ def load_paystubs_from_sheets(duckdb_con: duckdb.DuckDBPyConnection) -> None:
     logging.info(f'Loaded {rows_loaded} rows to S3 bucket for raw-paystubs')
 
 
+def extract_accounts(budget_data: Dict, duckdb_con: duckdb.DuckDBPyConnection) -> None:
+    accounts = pd.DataFrame(budget_data['accounts'])
+
+    rows_loaded = load_df_to_s3_table(
+        duckdb_con=duckdb_con,
+        df=accounts,
+        s3_key='accounts',
+        bucket_name=os.getenv('BUCKET_NAME'),
+    )
+
+    logging.info(f'Loaded {rows_loaded} rows to S3 bucket for accounts')
+
+
 etl_functions = {
     'category-groups': extract_category_groups,
     'monthly-categories': extract_categories,
     'transactions': extract_transactions,
     'subtransactions': extract_subtransactions,
+    'accounts': extract_accounts,
 }
 
 
