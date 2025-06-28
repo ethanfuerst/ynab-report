@@ -7,6 +7,7 @@ MODEL (
 with all_transactions as (
     select
         transactions.id
+        , transactions.account_id
         , transactions.category_id
         , transactions.amount
         , transactions.memo
@@ -23,6 +24,7 @@ with all_transactions as (
 , transactions_int as (
     select
         id
+        , account_id
         , coalesce(sub_category_id, category_id) as category_id
         , coalesce(subtransaction_amount, amount) as amount
         , coalesce(subtransaction_memo, memo) as memo
@@ -39,9 +41,13 @@ select
     , category_groups.category_group_name_mapping
     , transactions_int.amount
     , transactions_int.memo
+    , accounts.name as account_name
+    , accounts.type as account_type
 from transactions_int as transactions_int
 left join cleaned.categories as categories
     on transactions_int.category_id = categories.id
 left join cleaned.category_groups as category_groups
     on categories.category_group_id = category_groups.id
+left join cleaned.accounts as accounts
+    on transactions_int.account_id = accounts.id
 order by transactions_int.transaction_date desc
