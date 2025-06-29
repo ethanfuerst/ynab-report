@@ -547,14 +547,14 @@ rapidfuzz = ">=3.0.0,<4.0.0"
 
 [[package]]
 name = "click"
-version = "8.2.1"
+version = "8.1.8"
 description = "Composable command line interface toolkit"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"},
-    {file = "click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202"},
+    {file = "click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2"},
+    {file = "click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a"},
 ]
 
 [package.dependencies]
@@ -1992,29 +1992,29 @@ files = [
 
 [[package]]
 name = "modal"
-version = "0.72.58"
+version = "1.0.0"
 description = "Python client library for Modal"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "modal-0.72.58-py3-none-any.whl", hash = "sha256:4fd9d6048622546a19b1d29ab9b8ec82bb05458d95011298e52b047a75373e9a"},
+    {file = "modal-1.0.0-py3-none-any.whl", hash = "sha256:c8e2ea7b93d9a46be61bf6a0bf60a2125501033312bff6fab3f20135aeb53e1e"},
+    {file = "modal-1.0.0.tar.gz", hash = "sha256:0ffbf06a494ca176767ae512983d26812f6c5dc7aebc4535f96242dddbf3dc69"},
 ]
 
 [package.dependencies]
 aiohttp = "*"
 certifi = "*"
-click = ">=8.1.0"
-fastapi = "*"
+click = ">=8.1.0,<8.2.0"
 grpclib = "0.4.7"
-protobuf = ">=3.19,<4.24.0 || >4.24.0,<6.0"
+protobuf = ">=3.19,<4.24.0 || >4.24.0,<7.0"
 rich = ">=12.0.0"
-synchronicity = ">=0.9.9,<0.10.0"
+synchronicity = ">=0.9.12,<0.10.0"
 toml = "*"
 typer = ">=0.9"
 types-certifi = "*"
 types-toml = "*"
-typing-extensions = ">=4.6,<5.0"
+typing_extensions = ">=4.6,<5.0"
 watchfiles = "*"
 
 [[package]]
@@ -5017,4 +5017,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "ffe2779ecc113cb9f131a87b832fc7ea51ff33ea2fec0e2fcccab2ddaec7321c"
+content-hash = "0dfd6ea3525ca793c3908cd3328e4b060f0511887ce5d8db058181edef99058b"
