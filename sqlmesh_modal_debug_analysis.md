@@ -44,7 +44,7 @@ The `project_root` calculation works correctly in Modal:
 - SQLMesh context path: `project_root / 'src' / 'warehouse' / 'sqlmesh_project'` = `/root/src/warehouse/sqlmesh_project` ✓
 
 ## Solution
-Add the SQLMesh project directory explicitly to the Modal image:
+Add the SQLMesh project directory explicitly to the Modal image with consistent path prefixes:
 
 ```python
 modal_image = (
@@ -52,24 +52,39 @@ modal_image = (
     .poetry_install_from_file(poetry_pyproject_toml='pyproject.toml')
     .add_local_dir(
         'src/sheets/assets/formatting_configs/',
-        remote_path='/app/src/sheets/assets/formatting_configs/',
+        remote_path='/root/src/sheets/assets/formatting_configs/',  # ← Changed from /app to /root
     )
     .add_local_dir(
         'src/sheets/assets/column_ordering/',
-        remote_path='/app/src/sheets/assets/column_ordering/',
+        remote_path='/root/src/sheets/assets/column_ordering/',     # ← Changed from /app to /root
     )
     .add_local_dir(
         'src/warehouse/sqlmesh_project/',
-        remote_path='/app/src/warehouse/sqlmesh_project/',
-    )  # ← Added this line
-    .add_local_python_source('src')
+        remote_path='/root/src/warehouse/sqlmesh_project/',         # ← Added this line with /root prefix
+    )
+    .add_local_python_source('src')  # ← Copies Python files to /root/src/
 )
 ```
 
-This ensures all SQL model files are copied to the Modal container at the correct path.
+**Key Changes:**
+1. Added explicit copying of the SQLMesh project directory  
+2. Made all remote paths consistent using `/root` prefix (where `add_local_python_source` copies files)
+3. This ensures `project_root = /root` matches where all files are located
+
+## Alternative Approaches That Don't Work
+
+### Q: Could I just add `__init__.py` files to each model subfolder?
+**A: No.** Adding `__init__.py` files wouldn't solve the problem because:
+
+1. **File type filtering**: Even if model directories become Python packages, `add_local_python_source()` still only copies `.py` files
+2. **Content location**: SQLMesh model logic is in `.sql` files, not `.py` files - making directories into packages doesn't change the file types
+3. **Package structure ≠ File inclusion**: Python package structure doesn't override Modal's file type filtering behavior
+
+The `.sql` files would still be excluded regardless of package structure.
 
 ## Key Learnings
 1. `add_local_python_source()` only copies Python files, not other file types
-2. SQLMesh requires both the config AND the model files to be present
+2. SQLMesh requires both the config AND the model files to be present  
 3. Always explicitly copy non-Python assets that your application depends on
 4. Modal's file copying behavior differs between `add_local_python_source()` and `add_local_dir()`
+5. **Path consistency matters**: All file copying methods must use consistent remote path prefixes

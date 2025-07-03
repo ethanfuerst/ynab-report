@@ -19,15 +19,15 @@ modal_image = (
     .poetry_install_from_file(poetry_pyproject_toml='pyproject.toml')
     .add_local_dir(
         'src/sheets/assets/formatting_configs/',
-        remote_path='/app/src/sheets/assets/formatting_configs/',
+        remote_path='/root/src/sheets/assets/formatting_configs/',
     )
     .add_local_dir(
         'src/sheets/assets/column_ordering/',
-        remote_path='/app/src/sheets/assets/column_ordering/',
+        remote_path='/root/src/sheets/assets/column_ordering/',
     )
     .add_local_dir(
         'src/warehouse/sqlmesh_project/',
-        remote_path='/app/src/warehouse/sqlmesh_project/',
+        remote_path='/root/src/warehouse/sqlmesh_project/',
     )
     .add_local_python_source('src')
 )
