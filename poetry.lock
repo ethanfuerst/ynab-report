@@ -1992,24 +1992,24 @@ files = [
 
 [[package]]
 name = "modal"
-version = "1.0.0"
+version = "1.0.5"
 description = "Python client library for Modal"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "modal-1.0.0-py3-none-any.whl", hash = "sha256:c8e2ea7b93d9a46be61bf6a0bf60a2125501033312bff6fab3f20135aeb53e1e"},
-    {file = "modal-1.0.0.tar.gz", hash = "sha256:0ffbf06a494ca176767ae512983d26812f6c5dc7aebc4535f96242dddbf3dc69"},
+    {file = "modal-1.0.5-py3-none-any.whl", hash = "sha256:e575414b7e10c5ad97ae0a77149456f021e9f2c457559bb4a5af70771f481c09"},
+    {file = "modal-1.0.5.tar.gz", hash = "sha256:1c6927dd5eb9bd8d86d83ee499b87d64366525f1dd3e5b31d1ac1ed62090f72a"},
 ]
 
 [package.dependencies]
 aiohttp = "*"
 certifi = "*"
 click = ">=8.1.0,<8.2.0"
-grpclib = "0.4.7"
+grpclib = ">=0.4.7,<0.4.9"
 protobuf = ">=3.19,<4.24.0 || >4.24.0,<7.0"
 rich = ">=12.0.0"
-synchronicity = ">=0.9.12,<0.10.0"
+synchronicity = ">=0.9.15,<0.10.0"
 toml = "*"
 typer = ">=0.9"
 types-certifi = "*"
@@ -4019,14 +4019,14 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.7
 
 [[package]]
 name = "synchronicity"
-version = "0.9.12"
+version = "0.9.16"
 description = "Export blocking and async library versions from a single async implementation"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "synchronicity-0.9.12-py3-none-any.whl", hash = "sha256:b006f57bd216d55e578316096a11b6dc16016d6b48e2766bcffabe40c88f9793"},
-    {file = "synchronicity-0.9.12.tar.gz", hash = "sha256:977f3ed8f6e35de4d1a3f0aeee4937143ba8d913f531d33e8df7c539b2792fb8"},
+    {file = "synchronicity-0.9.16-py3-none-any.whl", hash = "sha256:79dd3451c063a06489d466b0585808e1d5d257fc3c2304f5f733a142ef269e97"},
+    {file = "synchronicity-0.9.16.tar.gz", hash = "sha256:bc174b756d12330b1e6027f8293c3b944cf3684dec241af009cb7bb169a0072f"},
 ]
 
 [package.dependencies]
