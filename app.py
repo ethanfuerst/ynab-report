@@ -25,6 +25,10 @@ modal_image = (
         'src/sheets/assets/column_ordering/',
         remote_path='/app/src/sheets/assets/column_ordering/',
     )
+    .add_local_dir(
+        'src/warehouse/sqlmesh_project/',
+        remote_path='/app/src/warehouse/sqlmesh_project/',
+    )
     .add_local_python_source('src')
 )
 
