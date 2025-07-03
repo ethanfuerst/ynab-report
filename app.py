@@ -25,6 +25,7 @@ modal_image = (
         'src/sheets/assets/column_ordering/',
         remote_path='/app/src/sheets/assets/column_ordering/',
     )
+    .add_local_python_source('src')
 )
 
 

@@ -21,6 +21,13 @@ fi
 
 log "Starting deployment of $FILE..."
 
+log "Installing dependencies..."
+poetry install
+
+log "Checking modal version..."
+poetry run modal --version
+
+log "Deploying $FILE..."
 poetry run modal deploy "$FILE"
 
 if [ $? -eq 0 ]; then
