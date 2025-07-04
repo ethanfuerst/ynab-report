@@ -14,21 +14,19 @@ if ! command -v poetry &> /dev/null; then
     exit 1
 fi
 
-if ! command -v modal &> /dev/null; then
-    log "Modal is not installed. Please install it first." >&2
+if ! command -v uv &> /dev/null; then
+    log "uv is not installed. Please install it first." >&2
     exit 1
 fi
 
-log "Starting deployment of $FILE..."
+# Install dependencies using uv
+uv sync
 
-log "Installing dependencies..."
-poetry install
+# Check if modal is available
+uv run modal --version
 
-log "Checking modal version..."
-poetry run modal --version
-
-log "Deploying $FILE..."
-poetry run modal deploy "$FILE"
+# Deploy using uv
+uv run modal deploy "$FILE"
 
 if [ $? -eq 0 ]; then
     log "Deployment completed successfully."
