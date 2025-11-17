@@ -111,15 +111,30 @@ def refresh_sheet_tab(
         sh.del_worksheet(sh.worksheet(title))
     except WorksheetNotFound:
         pass
-    sh.add_worksheet(title=title, rows=sheet_height, cols=cols)
-    worksheet = sh.worksheet(title)
+    except Exception as e:
+        logging.warning(f'Error deleting worksheet {title}: {e}')
+
+    result = retry_gspread_operation(
+        lambda: sh.add_worksheet(title=title, rows=sheet_height, cols=cols)
+    )
+    if result is None:
+        logging.error(f'Failed to add worksheet {title}')
+        raise Exception(f'Cannot continue without worksheet: {title}')
+
+    worksheet = retry_gspread_operation(lambda: sh.worksheet(title))
+    if worksheet is None:
+        logging.error(f'Failed to access worksheet {title}')
+        raise Exception(f'Cannot continue without worksheet: {title}')
+
     logging.info(f'{title} refreshed')
     return worksheet
 
 
 def add_last_updated_cell(worksheet: Worksheet, cell: str = 'B1') -> None:
-    worksheet.update_acell(
-        cell, 'Last Updated: ' + datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+    retry_gspread_operation(
+        lambda: worksheet.update_acell(
+            cell, 'Last Updated: ' + datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+        )
     )
 
 
@@ -148,16 +163,16 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     df_to_sheet(df, worksheet, 'B2', format_dict)
 
-    worksheet.format('B2:Y2', format_dict['B2:Y2'])
+    retry_gspread_operation(lambda: worksheet.format('B2:Y2', format_dict['B2:Y2']))
 
-    worksheet.columns_auto_resize(2, sheet_width)
+    retry_gspread_operation(lambda: worksheet.columns_auto_resize(2, sheet_width))
     for column, width in OVERVIEW_COLUMN_WIDTH_MAPPING.items():
         gsf.set_column_width(worksheet, column, width)
 
     notes_dict = load_json_config(
         'src/sheets/assets/formatting_configs/overview_notes.json'
     )
-    worksheet.insert_notes(notes_dict)
+    retry_gspread_operation(lambda: worksheet.insert_notes(notes_dict))
 
     add_last_updated_cell(worksheet)
 
@@ -259,7 +274,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         for column, column_width in YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING.items():
             gsf.set_column_width(worksheet, column, column_width)
 
-        worksheet.insert_notes(notes_dict)
+        retry_gspread_operation(lambda: worksheet.insert_notes(notes_dict))
         add_last_updated_cell(worksheet)
         logging.info(f'{year} - Categories updated')
 
@@ -270,7 +285,18 @@ def refresh_sheets() -> None:
     sh = gc.open('Spending Dashboard')
 
     logging.info('Refreshing overview dashboards')
-    refresh_overview_dashboard(sh, 'yearly')
-    refresh_overview_dashboard(sh, 'monthly')
+    try:
+        refresh_overview_dashboard(sh, 'yearly')
+    except Exception as e:
+        logging.error(f'Failed to refresh yearly overview dashboard: {e}')
+
+    try:
+        refresh_overview_dashboard(sh, 'monthly')
+    except Exception as e:
+        logging.error(f'Failed to refresh monthly overview dashboard: {e}')
+
     logging.info('Refreshing yearly categories dashboards')
-    refresh_yearly_categories_dashboards(sh)
+    try:
+        refresh_yearly_categories_dashboards(sh)
+    except Exception as e:
+        logging.error(f'Failed to refresh yearly categories dashboards: {e}')
