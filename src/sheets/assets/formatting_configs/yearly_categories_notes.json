@@ -1,8 +1,7 @@
 {
     "B3": "Gross Earnings",
-    "B4": "Salary",
-    "B5": "Bonus",
-    "B6": "FSA and Medical",
+    "B4": "FSA and Medical",
+    "B6": "Includes Bonus, PTO Payout, and Severance",
     "B7": "Medicare, Federal, State, City, NYPFL, Disability, and Social Security",
     "B8": "Pre Tax or Roth",
     "B9": "HSA Contribution",
