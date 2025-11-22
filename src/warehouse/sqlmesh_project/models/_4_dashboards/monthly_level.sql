@@ -79,9 +79,32 @@ with monthly_transactions as (
         and category_monthly_spine.category_id = monthly_budgeted.category_id
     group by 1
 )
+, date_range as (
+    select
+        least(
+            (select min(transaction_month) from monthly_transactions),
+            (select min(budget_month) from monthly_budgeted),
+            (select min(pay_month) from monthly_paystubs)
+        ) as min_date,
+        greatest(
+            (select max(transaction_month) from monthly_transactions),
+            (select max(pay_month) from monthly_paystubs)
+        ) as max_date
+)
+
+, monthly_date_spine as (
+    select
+        generate_series as budget_month
+    from
+        generate_series(
+            (select min_date from date_range)::date,
+            (select max_date from date_range)::date,
+            interval '1 month'
+        ) as months
+)
 
 select
-    monthly_transactions.budget_month
+    monthly_date_spine.budget_month
     , coalesce(monthly_paystubs.earnings_actual, 0) as earnings_actual
     , coalesce(monthly_paystubs.salary, 0) as salary
     , coalesce(monthly_paystubs.bonus, 0) as bonus
@@ -105,7 +128,9 @@ select
     , coalesce(monthly_transactions.emergency_fund_in_hsa, 0) as emergency_fund_in_hsa
     , coalesce(needs_spend + wants_spend + savings_spend + emergency_fund_spend, 0) as spent
     , round(coalesce(total_income, 0) + coalesce(spent, 0), 2) as difference
-from monthly_transactions_and_budgeted as monthly_transactions
+from monthly_date_spine
+left join monthly_transactions_and_budgeted as monthly_transactions
+    on monthly_date_spine.budget_month = monthly_transactions.budget_month
 left join monthly_paystubs
-    on monthly_transactions.budget_month = monthly_paystubs.pay_month
-order by monthly_transactions.budget_month desc
+    on monthly_date_spine.budget_month = monthly_paystubs.pay_month
+order by monthly_date_spine.budget_month desc
