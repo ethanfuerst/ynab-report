@@ -181,7 +181,10 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
 def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
     df = get_df_from_table('dashboards.yearly_category_level')
-    years = sorted(to_datetime(df['budget_year']).dt.year.unique(), reverse=True)
+    # Only include years that have paycheck data (exclude years with only transaction data)
+    df_with_paychecks = df[df['paycheck_col'].notna()]
+    years_with_paychecks = sorted(to_datetime(df_with_paychecks['budget_year']).dt.year.unique(), reverse=True)
+    years = years_with_paychecks
     sheet_height = int(df.groupby(['category_group', 'budget_year']).size().max()) + 3
 
     df = clean_category_names(df)
