@@ -12,6 +12,7 @@ with category_level as (
         , sum(activity) as spend
         , sum(budgeted) as assigned
     from combined.budgeted
+    where budget_year <= (select max(budget_year) from dashboards.yearly_level)
     group by
         1
         , 2
