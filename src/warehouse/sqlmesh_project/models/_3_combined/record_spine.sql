@@ -9,6 +9,7 @@ select
     , categories.id as category_id
     , categories.name as category_name
     , category_groups.category_group_name_mapping
+    , category_groups.subcategory_group_name
 from
     generate_series(
         (select min(date_trunc('month', transaction_date)) from cleaned.transactions)::date
