@@ -39,6 +39,7 @@ select
     , categories.category_group_id
     , categories.name as category_name
     , category_groups.category_group_name_mapping
+    , category_groups.subcategory_group_name
     , transactions_int.amount
     , transactions_int.memo
     , accounts.name as account_name

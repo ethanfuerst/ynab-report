@@ -193,8 +193,6 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
     sheet_height = int(df.groupby(['category_group', 'budget_year']).size().max()) + 3
 
     df = clean_category_names(df)
-    with open('src/sheets/assets/column_ordering/column_orders.json', 'r') as f:
-        column_orders = json.load(f)
 
     notes_dict = load_json_config(
         'src/sheets/assets/formatting_configs/yearly_categories_notes.json'
@@ -230,10 +228,16 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
 
         worksheet = refresh_sheet_tab(sh, title, sheet_height, 14)
 
-        df_needs = sort_columns(df_needs, 'Category', column_orders['needs'])
-        df_wants = sort_columns(df_wants, 'Category', column_orders['wants'])
+        needs_column_orders = get_df_from_table('cleaned.category_orders', "needs != ''")['needs'].values.tolist()
+        wants_column_orders = get_df_from_table('cleaned.category_orders', "wants != ''")['wants'].values.tolist()
+        other_column_orders = get_df_from_table('cleaned.category_orders', "other != ''")['other'].values.tolist()
+        category_groups_orders = get_df_from_table('cleaned.category_orders', "category_groups != ''")['category_groups'].values.tolist()
+        paycheck_orders = get_df_from_table('cleaned.category_orders', "paycheck != ''")['paycheck'].values.tolist()
+
+        df_needs = sort_columns(df_needs, 'Category', needs_column_orders)
+        df_wants = sort_columns(df_wants, 'Category', wants_column_orders)
         df_savings_emergency_investments = sort_columns(
-            df_savings_emergency_investments, 'Category', column_orders['other']
+            df_savings_emergency_investments, 'Category', other_column_orders
         )
 
         df_needs.columns = ['Needs', 'Spend']
@@ -256,7 +260,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         ]
 
         df_other = sort_columns(
-            df_other, 'Category Group', column_orders['category_groups']
+            df_other, 'Category Group', category_groups_orders
         )
         df_other.columns = ['Category Group', 'Assigned', 'Spend']
         df_to_sheet(df_other, worksheet, 'K12')
@@ -270,7 +274,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         )
 
         df_paycheck = sort_columns(
-            df_paycheck, 'Paycheck Value', column_orders['paycheck']
+            df_paycheck, 'Paycheck Value', paycheck_orders
         )
         df_to_sheet(df_paycheck, worksheet, 'B2')
 

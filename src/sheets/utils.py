@@ -33,9 +33,11 @@ def load_json_config(file_path: str) -> Dict[str, Any]:
     return remove_comments(config)
 
 
-def get_df_from_table(table: str) -> DataFrame:
+def get_df_from_table(table: str, where_clause: str = '') -> DataFrame:
+    if where_clause:
+        where_clause = f'where {where_clause}'
     duckdb_con = DuckDBConnection()
-    df = duckdb_con.df(f'select * from {table}')
+    df = duckdb_con.df(f'select * from {table} {where_clause}')
     duckdb_con.close()
     return df.replace([float('inf'), float('-inf'), float('nan')], None)
 
