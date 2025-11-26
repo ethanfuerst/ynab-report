@@ -1,5 +1,6 @@
 import os
 
+from sqlglot import exp
 from sqlmesh import macro
 
 
