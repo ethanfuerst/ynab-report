@@ -29,7 +29,7 @@ def create_data_warehouse(is_local_run: bool = True) -> None:
     )
     plan = sqlmesh_context.plan()
     sqlmesh_context.apply(plan)
-    output = sqlmesh_context.run()
+    _ = sqlmesh_context.run()
 
     if is_local_run:
         copy_duckdb_file()

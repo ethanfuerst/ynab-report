@@ -1,9 +1,7 @@
 import argparse
 import logging
-from typing import List
 
 import modal
-from modal.runner import deploy_app
 
 from src.etl.etl import etl_ynab_data
 from src.sheets.refresh_sheets import refresh_sheets

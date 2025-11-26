@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 
 import duckdb
 import pandas as pd
@@ -40,12 +40,10 @@ def extract_category_groups(
 ) -> None:
     category_groups = pd.DataFrame(budget_data['category_groups'])
 
-    today = datetime.now()
-
     rows_loaded = load_df_to_s3_table(
         duckdb_con=duckdb_con,
         df=category_groups.reset_index(drop=True),
-        s3_key=f'category-groups',
+        s3_key='category-groups',
         bucket_name=os.getenv('BUCKET_NAME'),
     )
 
@@ -73,7 +71,7 @@ def extract_categories(
     rows_loaded = load_df_to_s3_table(
         duckdb_con=duckdb_con,
         df=df.reset_index(drop=True),
-        s3_key=f'monthly-categories',
+        s3_key='monthly-categories',
         bucket_name=os.getenv('BUCKET_NAME'),
     )
 
@@ -88,7 +86,7 @@ def extract_transactions(
     rows_loaded = load_df_to_s3_table(
         duckdb_con=duckdb_con,
         df=transactions.reset_index(drop=True),
-        s3_key=f'transactions',
+        s3_key='transactions',
         bucket_name=os.getenv('BUCKET_NAME'),
     )
 
@@ -103,7 +101,7 @@ def extract_subtransactions(
     rows_loaded = load_df_to_s3_table(
         duckdb_con=duckdb_con,
         df=subtransactions,
-        s3_key=f'subtransactions',
+        s3_key='subtransactions',
         bucket_name=os.getenv('BUCKET_NAME'),
     )
 

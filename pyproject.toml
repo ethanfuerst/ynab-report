@@ -6,7 +6,7 @@ authors = [
     {name = "Ethan Fuerst", email = "34084535+ethanfuerst@users.noreply.github.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "certifi>=2024.12.14",
     "urllib3>=2.3.0",
