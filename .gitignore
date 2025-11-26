@@ -1,6 +1,5 @@
 .env
 __pycache__/
-src/sheets/assets/column_ordering/*.json
 .vscode/
 src/warehouse/sqlmesh_project/logs/
 src/warehouse/sqlmesh_project/.cache/
