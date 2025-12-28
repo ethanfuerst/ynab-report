@@ -8,13 +8,9 @@ select
     id
     , name
     , case
-        when name like 'Needs%'
-            then 'Needs'
-        when name like 'Wants%'
-            then 'Wants'
         when name = 'Internal Master Category'
             then 'Income'
-        else name
+        else split(name, ' - ')[1]
     end as category_group_name_mapping
     , split(name, ' - ')[2] as subcategory_group_name
 from raw.category_groups
