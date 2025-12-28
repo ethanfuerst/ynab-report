@@ -330,6 +330,12 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         f'Updating yearly categories dashboards for years: {", ".join(map(str, years))}'
     )
 
+    needs_column_orders = get_df_from_table('cleaned.category_orders', "needs != ''")['needs'].values.tolist()
+    wants_column_orders = get_df_from_table('cleaned.category_orders', "wants != ''")['wants'].values.tolist()
+    other_column_orders = get_df_from_table('cleaned.category_orders', "other != ''")['other'].values.tolist()
+    category_groups_orders = get_df_from_table('cleaned.category_orders', "category_groups != ''")['category_groups'].values.tolist()
+    paycheck_orders = get_df_from_table('cleaned.category_orders', "paycheck != ''")['paycheck'].values.tolist()
+
     for year in years:
         logging.info(f'Updating {year} - Categories')
 
@@ -355,12 +361,6 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         ][['Category', 'Assigned', 'Spend']]
 
         worksheet = refresh_sheet_tab(sh, title, sheet_height, 14)
-
-        needs_column_orders = get_df_from_table('cleaned.category_orders', "needs != ''")['needs'].values.tolist()
-        wants_column_orders = get_df_from_table('cleaned.category_orders', "wants != ''")['wants'].values.tolist()
-        other_column_orders = get_df_from_table('cleaned.category_orders', "other != ''")['other'].values.tolist()
-        category_groups_orders = get_df_from_table('cleaned.category_orders', "category_groups != ''")['category_groups'].values.tolist()
-        paycheck_orders = get_df_from_table('cleaned.category_orders', "paycheck != ''")['paycheck'].values.tolist()
 
         df_needs = sort_columns(df_needs, 'Category', needs_column_orders)
         df_wants = sort_columns(df_wants, 'Category', wants_column_orders)
