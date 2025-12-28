@@ -184,6 +184,134 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     add_last_updated_cell(worksheet)
 
+    # Format the following with lines
+    # B2 to Y(sheet height - 1) outer border
+    # Format non-corner cells first, then corner cells with all borders
+
+    # Left border: column B excluding corners (B3 to B{sheet_height-2})
+    if sheet_height > 4:
+        worksheet.format(f'B3:B{sheet_height - 2}', {
+            'borders': {
+                'left': {
+                    'style': 'SOLID',
+                },
+            }
+        })
+
+    # Right border: column Y excluding corners (Y3 to Y{sheet_height-2})
+    if sheet_height > 4:
+        worksheet.format(f'Y3:Y{sheet_height - 2}', {
+            'borders': {
+                'right': {
+                    'style': 'SOLID',
+                },
+            }
+        })
+
+    # Top border: row 2 excluding corners (C2 to X2)
+    worksheet.format('C2:X2', {
+        'borders': {
+            'top': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Bottom border: last row excluding corners (C{sheet_height-1} to X{sheet_height-1})
+    worksheet.format(f'C{sheet_height - 1}:X{sheet_height - 1}', {
+        'borders': {
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Corner cells with all borders combined
+    # Top-left corner (B2): left + top
+    worksheet.format('B2', {
+        'borders': {
+            'left': {
+                'style': 'SOLID',
+            },
+            'top': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Top-right corner (Y2): right + top
+    worksheet.format('Y2', {
+        'borders': {
+            'right': {
+                'style': 'SOLID',
+            },
+            'top': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Bottom-left corner (B{sheet_height-1}): left + bottom
+    worksheet.format(f'B{sheet_height - 1}', {
+        'borders': {
+            'left': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Bottom-right corner (Y{sheet_height-1}): right + bottom
+    worksheet.format(f'Y{sheet_height - 1}', {
+        'borders': {
+            'right': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+    # following columns row 3 to row (sheet height - 1) left border
+    # C, D, F, K, L, P, T, W, X, Y
+    columns_to_format = ['C', 'D', 'F', 'K', 'L', 'P', 'T', 'W', 'X', 'Y']
+
+    def create_border_dict(sides):
+        """Create a border format dictionary for the specified sides."""
+        border_style = {'style': 'SOLID'}
+        borders = {}
+        for side in sides:
+            borders[side] = border_style
+        return {'borders': borders}
+
+    # Format each column: middle rows, row 3, and row (sheet_height-1)
+    for col in columns_to_format:
+        is_column_y = (col == 'Y')
+
+        # Middle rows (4 to sheet_height-2): left border (and right for column Y)
+        if sheet_height > 5:
+            sides = ['left', 'right'] if is_column_y else ['left']
+            worksheet.format(f'{col}4:{col}{sheet_height - 2}', create_border_dict(sides))
+
+        # Row 3: left + top borders (and right for column Y)
+        sides = ['left', 'top', 'right'] if is_column_y else ['left', 'top']
+        worksheet.format(f'{col}3', create_border_dict(sides))
+
+        # Row (sheet_height-1): left + bottom borders (and right for column Y)
+        sides = ['left', 'right', 'bottom'] if is_column_y else ['left', 'bottom']
+        worksheet.format(f'{col}{sheet_height - 1}', create_border_dict(sides))
+
     logging.info(f'{title} updated')
 
 
@@ -255,7 +383,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
 
         df_other = df_category_groups[
             ~df_category_groups['Category Group'].isin(
-                ['Income', 'Credit Card Payments']
+                ['Income', 'Credit Card Payments', 'Internal Master Category']
             )
         ]
 
