@@ -16,6 +16,7 @@ from sqlmesh import ExecutionContext, model
         'wants': 'text',
         'other': 'text',
         'category_groups': 'text',
+        'subcategory_groups': 'text',
         'paycheck': 'text',
     },
     column_descriptions={
@@ -23,6 +24,7 @@ from sqlmesh import ExecutionContext, model
         'wants': 'List of wants categories',
         'other': 'List of other categories',
         'category_groups': 'List of category groups',
+        'subcategory_groups': 'List of subcategory groups',
         'paycheck': 'List of paycheck categories',
     },
 )

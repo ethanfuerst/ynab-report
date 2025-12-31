@@ -10,5 +10,6 @@ select
     , wants
     , other
     , category_groups
+    , subcategory_groups
     , paycheck
 from raw.category_orders

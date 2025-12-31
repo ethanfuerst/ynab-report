@@ -81,11 +81,11 @@ YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
     'B': 185,
     'C': 90,
     'D': 21,
-    'E': 85,
+    'E': 190,
     'F': 175,
     'G': 85,
     'H': 21,
-    'I': 150,
+    'I': 190,
     'J': 180,
     'K': 85,
     'L': 21,
@@ -336,6 +336,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
     wants_column_orders = get_df_from_table('cleaned.category_orders', "wants != ''")['wants'].values.tolist()
     other_column_orders = get_df_from_table('cleaned.category_orders', "other != ''")['other'].values.tolist()
     category_groups_orders = get_df_from_table('cleaned.category_orders', "category_groups != ''")['category_groups'].values.tolist()
+    subcategory_groups_orders = get_df_from_table('cleaned.category_orders', "subcategory_groups != ''")['subcategory_groups'].values.tolist()
     paycheck_orders = get_df_from_table('cleaned.category_orders', "paycheck != ''")['paycheck'].values.tolist()
 
     for year in years:
@@ -347,6 +348,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         df_year.columns = [
             'Category',
             'Category Group',
+            'Subcategory Group',
             'Year',
             'Spend',
             'Assigned',
@@ -354,8 +356,8 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             'Paycheck Value',
         ]
 
-        df_needs = df_year[df_year['Category Group'] == 'Needs'][['Category', 'Spend']]
-        df_wants = df_year[df_year['Category Group'] == 'Wants'][['Category', 'Spend']]
+        df_needs = df_year[df_year['Category Group'] == 'Needs'][['Subcategory Group', 'Category', 'Spend']]
+        df_wants = df_year[df_year['Category Group'] == 'Wants'][['Subcategory Group', 'Category', 'Spend']]
         df_savings_emergency_investments = df_year[
             df_year['Category Group'].isin(
                 ['Savings', 'Emergency Fund', 'Investments', 'Net Zero Expenses']
@@ -370,11 +372,11 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             df_savings_emergency_investments, 'Category', other_column_orders
         )
 
-        df_needs.columns = ['Needs', 'Spend']
-        df_to_sheet(df_needs, worksheet, 'F2') # move this back to E2 when new column is added
+        df_needs.columns = ['Subcategory Group', 'Needs', 'Spend']
+        df_to_sheet(df_needs, worksheet, 'E2')
 
-        df_wants.columns = ['Wants', 'Spend']
-        df_to_sheet(df_wants, worksheet, 'J2') # move this back to I2 when new column is added
+        df_wants.columns = ['Subcategory Group', 'Wants', 'Spend']
+        df_to_sheet(df_wants, worksheet, 'I2')
 
         df_savings_emergency_investments.columns = ['Other', 'Assigned', 'Spend']
         df_to_sheet(df_savings_emergency_investments, worksheet, 'M2')
@@ -394,6 +396,15 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         )
         df_other.columns = ['Category Group', 'Assigned', 'Spend']
         df_to_sheet(df_other, worksheet, 'M12')
+
+        df_subcategory_groups = (
+            df_year.groupby('Subcategory Group')[['Assigned', 'Spend']].sum().reset_index()
+        )
+        df_subcategory_groups = sort_columns(
+            df_subcategory_groups, 'Subcategory Group', subcategory_groups_orders
+        )
+        df_subcategory_groups.columns = ['Subcategory Group', 'Assigned',  'Spend']
+        df_to_sheet(df_subcategory_groups, worksheet, 'M20')
 
         df_paycheck = df_year[df_year['Paycheck Column'].notna()][
             ['Paycheck Column', 'Paycheck Value']

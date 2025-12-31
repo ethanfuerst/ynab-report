@@ -98,5 +98,21 @@
             "type": "CURRENCY",
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
+    },
+    "M20:O20": {
+        "_comment": "Column Headers for Subcategory Groups",
+        "horizontalAlignment": "CENTER",
+        "textFormat": {
+            "fontSize": 12,
+            "bold": true
+        }
+    },
+    "N21:O33": {
+        "_comment": "Subcategory Group Numbers",
+        "horizontalAlignment": "RIGHT",
+        "numberFormat": {
+            "type": "CURRENCY",
+            "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
+        }
     }
 }
