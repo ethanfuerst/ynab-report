@@ -15,7 +15,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "E2:F2": {
+    "E2:G2": {
         "_comment": "Column Headers for Needs",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -23,12 +23,12 @@
             "bold": true
         }
     },
-    "E3:E": {
+    "E3:F": {
         "_comment": "Needs Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "F3:F": {
+    "G3:G": {
         "_comment": "Needs Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
@@ -36,7 +36,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "H2:I2": {
+    "I2:K2": {
         "_comment": "Column Headers for Wants",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -44,12 +44,12 @@
             "bold": true
         }
     },
-    "H3:H": {
+    "I3:J": {
         "_comment": "Wants Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "I3:I": {
+    "K3:K": {
         "_comment": "Wants Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
@@ -57,7 +57,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "K2:M2": {
+    "M2:O2": {
         "_comment": "Column Headers for Savings, Emergency Fund, Investments",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -65,12 +65,12 @@
             "bold": true
         }
     },
-    "K3:K10": {
+    "M3:M10": {
         "_comment": "Savings, Emergency Fund, Investments Category Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "L3:M10": {
+    "N3:O10": {
         "_comment": "Savings, Emergency Fund, Investments Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {
@@ -78,7 +78,7 @@
             "pattern": "[Color 10]$#,##0.00;[Color 9]($#,##0.00);$0.00"
         }
     },
-    "K12:M12": {
+    "M12:O12": {
         "_comment": "Column Headers for Category Groups",
         "horizontalAlignment": "CENTER",
         "textFormat": {
@@ -86,12 +86,12 @@
             "bold": true
         }
     },
-    "K13:K18": {
+    "M13:M18": {
         "_comment": "Category Group Names",
         "horizontalAlignment": "LEFT",
         "hyperlinkDisplayType": "PLAIN_TEXT"
     },
-    "L13:M18": {
+    "N13:O18": {
         "_comment": "Category Group Numbers",
         "horizontalAlignment": "RIGHT",
         "numberFormat": {

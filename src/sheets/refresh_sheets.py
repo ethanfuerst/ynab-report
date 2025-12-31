@@ -79,18 +79,20 @@ OVERVIEW_COLUMN_TITLES = [
 YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
     'A': 21,
     'B': 185,
-    'C': 80,
+    'C': 90,
     'D': 21,
-    'E': 190,
-    'F': 85,
-    'G': 21,
-    'H': 150,
-    'I': 85,
-    'J': 21,
-    'K': 230,
-    'L': 85,
-    'M': 85,
-    'N': 21,
+    'E': 85,
+    'F': 175,
+    'G': 85,
+    'H': 21,
+    'I': 150,
+    'J': 180,
+    'K': 85,
+    'L': 21,
+    'M': 230,
+    'N': 85,
+    'O': 85,
+    'P': 21,
 }
 PAYCHECK_COLUMN_MAPPING = {
     'earnings_actual': 'Pre-Tax Earnings',
@@ -360,7 +362,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             )
         ][['Category', 'Assigned', 'Spend']]
 
-        worksheet = refresh_sheet_tab(sh, title, sheet_height, 14)
+        worksheet = refresh_sheet_tab(sh, title, sheet_height, 16)
 
         df_needs = sort_columns(df_needs, 'Category', needs_column_orders)
         df_wants = sort_columns(df_wants, 'Category', wants_column_orders)
@@ -369,13 +371,13 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         )
 
         df_needs.columns = ['Needs', 'Spend']
-        df_to_sheet(df_needs, worksheet, 'E2')
+        df_to_sheet(df_needs, worksheet, 'F2') # move this back to E2 when new column is added
 
         df_wants.columns = ['Wants', 'Spend']
-        df_to_sheet(df_wants, worksheet, 'H2')
+        df_to_sheet(df_wants, worksheet, 'J2') # move this back to I2 when new column is added
 
         df_savings_emergency_investments.columns = ['Other', 'Assigned', 'Spend']
-        df_to_sheet(df_savings_emergency_investments, worksheet, 'K2')
+        df_to_sheet(df_savings_emergency_investments, worksheet, 'M2')
 
         df_category_groups = (
             df_year.groupby('Category Group')[['Assigned', 'Spend']].sum().reset_index()
@@ -391,7 +393,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             df_other, 'Category Group', category_groups_orders
         )
         df_other.columns = ['Category Group', 'Assigned', 'Spend']
-        df_to_sheet(df_other, worksheet, 'K12')
+        df_to_sheet(df_other, worksheet, 'M12')
 
         df_paycheck = df_year[df_year['Paycheck Column'].notna()][
             ['Paycheck Column', 'Paycheck Value']
