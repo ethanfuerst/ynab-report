@@ -10,6 +10,7 @@ select
     , monthly_categories.budget_month
     , monthly_categories.name as category_name
     , category_groups.name as category_group_name
+    , category_groups.subcategory_group_name
     , category_groups.category_group_name_mapping
     , monthly_categories.budgeted
     , monthly_categories.activity

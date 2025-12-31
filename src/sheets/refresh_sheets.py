@@ -79,18 +79,20 @@ OVERVIEW_COLUMN_TITLES = [
 YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
     'A': 21,
     'B': 185,
-    'C': 80,
+    'C': 90,
     'D': 21,
     'E': 190,
-    'F': 85,
-    'G': 21,
-    'H': 150,
-    'I': 85,
-    'J': 21,
-    'K': 230,
-    'L': 85,
-    'M': 85,
-    'N': 21,
+    'F': 175,
+    'G': 85,
+    'H': 21,
+    'I': 210,
+    'J': 180,
+    'K': 85,
+    'L': 21,
+    'M': 230,
+    'N': 85,
+    'O': 85,
+    'P': 21,
 }
 PAYCHECK_COLUMN_MAPPING = {
     'earnings_actual': 'Pre-Tax Earnings',
@@ -184,6 +186,134 @@ def refresh_overview_dashboard(sh: Worksheet, grain: str) -> None:
 
     add_last_updated_cell(worksheet)
 
+    # Format the following with lines
+    # B2 to Y(sheet height - 1) outer border
+    # Format non-corner cells first, then corner cells with all borders
+
+    # Left border: column B excluding corners (B3 to B{sheet_height-2})
+    if sheet_height > 4:
+        worksheet.format(f'B3:B{sheet_height - 2}', {
+            'borders': {
+                'left': {
+                    'style': 'SOLID',
+                },
+            }
+        })
+
+    # Right border: column Y excluding corners (Y3 to Y{sheet_height-2})
+    if sheet_height > 4:
+        worksheet.format(f'Y3:Y{sheet_height - 2}', {
+            'borders': {
+                'right': {
+                    'style': 'SOLID',
+                },
+            }
+        })
+
+    # Top border: row 2 excluding corners (C2 to X2)
+    worksheet.format('C2:X2', {
+        'borders': {
+            'top': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Bottom border: last row excluding corners (C{sheet_height-1} to X{sheet_height-1})
+    worksheet.format(f'C{sheet_height - 1}:X{sheet_height - 1}', {
+        'borders': {
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Corner cells with all borders combined
+    # Top-left corner (B2): left + top
+    worksheet.format('B2', {
+        'borders': {
+            'left': {
+                'style': 'SOLID',
+            },
+            'top': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Top-right corner (Y2): right + top
+    worksheet.format('Y2', {
+        'borders': {
+            'right': {
+                'style': 'SOLID',
+            },
+            'top': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Bottom-left corner (B{sheet_height-1}): left + bottom
+    worksheet.format(f'B{sheet_height - 1}', {
+        'borders': {
+            'left': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+
+    # Bottom-right corner (Y{sheet_height-1}): right + bottom
+    worksheet.format(f'Y{sheet_height - 1}', {
+        'borders': {
+            'right': {
+                'style': 'SOLID',
+            },
+            'bottom': {
+                'style': 'SOLID',
+            },
+        }
+    })
+    # following columns row 3 to row (sheet height - 1) left border
+    # C, D, F, K, L, P, T, W, X, Y
+    columns_to_format = ['C', 'D', 'F', 'K', 'L', 'P', 'T', 'W', 'X', 'Y']
+
+    def create_border_dict(sides):
+        """Create a border format dictionary for the specified sides."""
+        border_style = {'style': 'SOLID'}
+        borders = {}
+        for side in sides:
+            borders[side] = border_style
+        return {'borders': borders}
+
+    # Format each column: middle rows, row 3, and row (sheet_height-1)
+    for col in columns_to_format:
+        is_column_y = (col == 'Y')
+
+        # Middle rows (4 to sheet_height-2): left border (and right for column Y)
+        if sheet_height > 5:
+            sides = ['left', 'right'] if is_column_y else ['left']
+            worksheet.format(f'{col}4:{col}{sheet_height - 2}', create_border_dict(sides))
+
+        # Row 3: left + top borders (and right for column Y)
+        sides = ['left', 'top', 'right'] if is_column_y else ['left', 'top']
+        worksheet.format(f'{col}3', create_border_dict(sides))
+
+        # Row (sheet_height-1): left + bottom borders (and right for column Y)
+        sides = ['left', 'right', 'bottom'] if is_column_y else ['left', 'bottom']
+        worksheet.format(f'{col}{sheet_height - 1}', create_border_dict(sides))
+
     logging.info(f'{title} updated')
 
 
@@ -193,8 +323,6 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
     sheet_height = int(df.groupby(['category_group', 'budget_year']).size().max()) + 3
 
     df = clean_category_names(df)
-    with open('src/sheets/assets/column_ordering/column_orders.json', 'r') as f:
-        column_orders = json.load(f)
 
     notes_dict = load_json_config(
         'src/sheets/assets/formatting_configs/yearly_categories_notes.json'
@@ -203,6 +331,13 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
     logging.info(
         f'Updating yearly categories dashboards for years: {", ".join(map(str, years))}'
     )
+
+    needs_column_orders = get_df_from_table('cleaned.category_orders', "needs != ''")['needs'].values.tolist()
+    wants_column_orders = get_df_from_table('cleaned.category_orders', "wants != ''")['wants'].values.tolist()
+    other_column_orders = get_df_from_table('cleaned.category_orders', "other != ''")['other'].values.tolist()
+    category_groups_orders = get_df_from_table('cleaned.category_orders', "category_groups != ''")['category_groups'].values.tolist()
+    subcategory_groups_orders = get_df_from_table('cleaned.category_orders', "subcategory_groups != ''")['subcategory_groups'].values.tolist()
+    paycheck_orders = get_df_from_table('cleaned.category_orders', "paycheck != ''")['paycheck'].values.tolist()
 
     for year in years:
         logging.info(f'Updating {year} - Categories')
@@ -213,6 +348,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         df_year.columns = [
             'Category',
             'Category Group',
+            'Subcategory Group',
             'Year',
             'Spend',
             'Assigned',
@@ -220,30 +356,30 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
             'Paycheck Value',
         ]
 
-        df_needs = df_year[df_year['Category Group'] == 'Needs'][['Category', 'Spend']]
-        df_wants = df_year[df_year['Category Group'] == 'Wants'][['Category', 'Spend']]
+        df_needs = df_year[df_year['Category Group'] == 'Needs'][['Subcategory Group', 'Category', 'Spend']]
+        df_wants = df_year[df_year['Category Group'] == 'Wants'][['Subcategory Group', 'Category', 'Spend']]
         df_savings_emergency_investments = df_year[
             df_year['Category Group'].isin(
                 ['Savings', 'Emergency Fund', 'Investments', 'Net Zero Expenses']
             )
         ][['Category', 'Assigned', 'Spend']]
 
-        worksheet = refresh_sheet_tab(sh, title, sheet_height, 14)
+        worksheet = refresh_sheet_tab(sh, title, sheet_height, 16)
 
-        df_needs = sort_columns(df_needs, 'Category', column_orders['needs'])
-        df_wants = sort_columns(df_wants, 'Category', column_orders['wants'])
+        df_needs = sort_columns(df_needs, 'Category', needs_column_orders)
+        df_wants = sort_columns(df_wants, 'Category', wants_column_orders)
         df_savings_emergency_investments = sort_columns(
-            df_savings_emergency_investments, 'Category', column_orders['other']
+            df_savings_emergency_investments, 'Category', other_column_orders
         )
 
-        df_needs.columns = ['Needs', 'Spend']
+        df_needs.columns = ['Subcategory Group', 'Needs', 'Spend']
         df_to_sheet(df_needs, worksheet, 'E2')
 
-        df_wants.columns = ['Wants', 'Spend']
-        df_to_sheet(df_wants, worksheet, 'H2')
+        df_wants.columns = ['Subcategory Group', 'Wants', 'Spend']
+        df_to_sheet(df_wants, worksheet, 'I2')
 
         df_savings_emergency_investments.columns = ['Other', 'Assigned', 'Spend']
-        df_to_sheet(df_savings_emergency_investments, worksheet, 'K2')
+        df_to_sheet(df_savings_emergency_investments, worksheet, 'M2')
 
         df_category_groups = (
             df_year.groupby('Category Group')[['Assigned', 'Spend']].sum().reset_index()
@@ -251,15 +387,24 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
 
         df_other = df_category_groups[
             ~df_category_groups['Category Group'].isin(
-                ['Income', 'Credit Card Payments']
+                ['Income', 'Credit Card Payments', 'Internal Master Category']
             )
         ]
 
         df_other = sort_columns(
-            df_other, 'Category Group', column_orders['category_groups']
+            df_other, 'Category Group', category_groups_orders
         )
         df_other.columns = ['Category Group', 'Assigned', 'Spend']
-        df_to_sheet(df_other, worksheet, 'K12')
+        df_to_sheet(df_other, worksheet, 'M12')
+
+        df_subcategory_groups = (
+            df_year.groupby('Subcategory Group')[['Assigned', 'Spend']].sum().reset_index()
+        )
+        df_subcategory_groups = sort_columns(
+            df_subcategory_groups, 'Subcategory Group', subcategory_groups_orders
+        )
+        df_subcategory_groups.columns = ['Subcategory Group', 'Assigned',  'Spend']
+        df_to_sheet(df_subcategory_groups, worksheet, 'M20')
 
         df_paycheck = df_year[df_year['Paycheck Column'].notna()][
             ['Paycheck Column', 'Paycheck Value']
@@ -270,7 +415,7 @@ def refresh_yearly_categories_dashboards(sh: Worksheet) -> None:
         )
 
         df_paycheck = sort_columns(
-            df_paycheck, 'Paycheck Value', column_orders['paycheck']
+            df_paycheck, 'Paycheck Value', paycheck_orders
         )
         df_to_sheet(df_paycheck, worksheet, 'B2')
 

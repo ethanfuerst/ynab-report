@@ -7,6 +7,7 @@ MODEL (
 with category_level as (
     select
         category_name
+        , subcategory_group_name as subcategory_group
         , category_group_name_mapping as category_group
         , date_trunc('year', budget_month) as budget_year
         , sum(activity) as spend
@@ -17,6 +18,7 @@ with category_level as (
         1
         , 2
         , 3
+        , 4
 )
 
 , pre_un_pivot as (
@@ -77,6 +79,7 @@ with category_level as (
 select
     category_name
     , category_group
+    , subcategory_group
     , budget_year
     , spend
     , assigned
@@ -89,6 +92,7 @@ union all
 select
     null as category_name
     , null as category_group
+    , null as subcategory_group
     , budget_year
     , null as spend
     , null as assigned
@@ -101,6 +105,7 @@ union all
 select
     null as category_name
     , null as category_group
+    , null as subcategory_group
     , budget_year
     , null as spend
     , null as assigned
@@ -113,6 +118,7 @@ union all
 select
     null as category_name
     , null as category_group
+    , null as subcategory_group
     , budget_year
     , null as spend
     , null as assigned

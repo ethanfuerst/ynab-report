@@ -11,8 +11,8 @@
     "B13": "Income for Items Reimbursed by Employer. Not counted in Total Income because the spend is categorized as a net zero expense category.",
     "B14": "Any income not from an employer. Credit Card Cash Back, Selling items, gifts, etc.",
     "B15": "Net Pay + Miscellaneous Income",
-    "K17": "Investment categories equal 0 at the end of the month and all money budgeted is invested.",
-    "K8": "Amount spent on items that can be reimbursed by the HSA, but have not been reimbursed yet. This money can be used for emergency expenses as a last resort.",
     "B16": "Needs Spend + Wants Spend + Savings Spend + Emergency Fund Spend",
-    "B17": "Total Income (Net to Account) - Total Spend"
+    "B17": "Total Income (Net to Account) - Total Spend",
+    "M8": "Amount spent on items that can be reimbursed by the HSA, but have not been reimbursed yet. This money can be used for emergency expenses as a last resort.",
+    "M17": "Investment categories equal 0 at the end of the month and all money budgeted is invested."
 }
