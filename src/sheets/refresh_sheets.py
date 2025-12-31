@@ -85,7 +85,7 @@ YEARLY_CATEGORIES_COLUMN_WIDTH_MAPPING = {
     'F': 175,
     'G': 85,
     'H': 21,
-    'I': 190,
+    'I': 210,
     'J': 180,
     'K': 85,
     'L': 21,
