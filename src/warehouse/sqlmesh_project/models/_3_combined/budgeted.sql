@@ -8,7 +8,7 @@ select
     monthly_categories.id as category_id
     , category_groups.id as category_group_id
     , monthly_categories.budget_month
-    , monthly_categories.name as category_name
+    , monthly_categories.category_name
     , category_groups.name as category_group_name
     , category_groups.subcategory_group_name
     , category_groups.category_group_name_mapping
