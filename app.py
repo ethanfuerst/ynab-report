@@ -16,10 +16,6 @@ modal_image = (
     modal.Image.debian_slim(python_version='3.10')
     .pip_install_from_pyproject("pyproject.toml")
     .add_local_dir(
-        'src/sheets/assets/formatting_configs/',
-        remote_path='/root/src/sheets/assets/formatting_configs/',
-    )
-    .add_local_dir(
         'src/warehouse/sqlmesh_project/',
         remote_path='/root/src/warehouse/sqlmesh_project/',
     )

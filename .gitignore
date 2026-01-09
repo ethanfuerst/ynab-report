@@ -6,3 +6,4 @@ src/warehouse/sqlmesh_project/.cache/
 logs/
 *.duckdb
 *.duckdb.wal
+.claude/
