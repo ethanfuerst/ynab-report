@@ -1,15 +1,13 @@
 MODEL (
   name cleaned.category_orders,
   kind FULL,
-  grain id
+  grain order_id
 );
 
 select
-    row_number() over () as id
-    , needs
-    , wants
-    , other
-    , category_groups
-    , subcategory_groups
-    , paycheck
+    id as order_id
+    , category_group
+    , subcategory_group
+    , category_name
 from raw.category_orders
+order by order_id

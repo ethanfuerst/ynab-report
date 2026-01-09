@@ -7,12 +7,16 @@ MODEL (
 select
     id
     , category_group_id
-    , name
+    , trim(
+        regexp_replace(
+            regexp_replace(name, '[^\pL\pN\s.&/]+', ' ', 'g'),
+            '\s+',
+            ' ',
+            'g'
+        )
+    ) as category_name
     , make_date(year, month, 1) as budget_month
     , budgeted / 1000 as budgeted
     , balance / 1000 as balance
     , activity / 1000 as activity
 from raw.monthly_categories
-order by
-    budget_month desc
-    , name desc

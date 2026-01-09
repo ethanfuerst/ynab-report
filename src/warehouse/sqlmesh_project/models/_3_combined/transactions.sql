@@ -37,7 +37,7 @@ select
     , transactions_int.transaction_date
     , categories.id as category_id
     , categories.category_group_id
-    , categories.name as category_name
+    , categories.category_name
     , category_groups.category_group_name_mapping
     , category_groups.subcategory_group_name
     , transactions_int.amount

@@ -12,20 +12,16 @@ from sqlmesh import ExecutionContext, model
 @model(
     'raw.category_orders',
     columns={
-        'needs': 'text',
-        'wants': 'text',
-        'other': 'text',
-        'category_groups': 'text',
-        'subcategory_groups': 'text',
-        'paycheck': 'text',
+        'id': 'int',
+        'category_group': 'text',
+        'subcategory_group': 'text',
+        'category_name': 'text',
     },
     column_descriptions={
-        'needs': 'List of needs categories',
-        'wants': 'List of wants categories',
-        'other': 'List of other categories',
-        'category_groups': 'List of category groups',
-        'subcategory_groups': 'List of subcategory groups',
-        'paycheck': 'List of paycheck categories',
+        'id': 'Row Id',
+        'category_group': 'Category Group',
+        'subcategory_group': 'Subcategory Group',
+        'category_name': 'Category Name',
     },
 )
 def execute(
@@ -41,5 +37,6 @@ def execute(
 
     raw = sh.get_all_values()
     df = DataFrame(data=raw[1:], columns=raw[0]).astype(str)
+    df.insert(0, 'id', range(1, len(df) + 1))
 
     return df

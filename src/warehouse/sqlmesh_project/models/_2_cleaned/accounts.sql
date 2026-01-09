@@ -17,4 +17,3 @@ select
     , transfer_payee_id
     , last_reconciled_at
 from raw.accounts
-order by name
