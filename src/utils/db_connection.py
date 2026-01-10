@@ -22,7 +22,7 @@ class DuckDBConnection:
         s3_secret_access_key_id_var_name = f'{access_type}_SECRET_ACCESS_KEY_ID'
 
         self.connection.execute(
-            f'''
+            f"""
             install httpfs;
             load httpfs;
             CREATE OR REPLACE TEMPORARY SECRET {access_type}_SECRET (
@@ -32,7 +32,7 @@ class DuckDBConnection:
                 REGION 'nyc3',
                 ENDPOINT 'nyc3.digitaloceanspaces.com'
             );
-            '''
+            """
         )
 
     def get_connection(self):

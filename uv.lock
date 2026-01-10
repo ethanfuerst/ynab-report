@@ -503,17 +503,6 @@ wheels = [
 ]
 
 [[package]]
-name = "gspread-formatting"
-version = "1.2.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "gspread" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/26/71/b32df64c1bb97c2289f0916c6192d2d37cfc4a78b863b545b4b27142f3bc/gspread_formatting-1.2.1-py2.py3-none-any.whl", hash = "sha256:76bef0e751dc276bab666351035f15a818866dea5ca20603a34ae6c847333662", size = 22391, upload-time = "2025-03-07T20:24:53.474Z" },
-]
-
-[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -673,6 +662,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3e/48/d3dbac45c2814cb73812f98dd6b38bbcc957a4e7bb31d6ea9c03bf94ed87/ipywidgets-8.1.7.tar.gz", hash = "sha256:15f1ac050b9ccbefd45dccfbb2ef6bed0029d8278682d569d71b8dd96bee0376", size = 116721, upload-time = "2025-05-05T12:42:03.489Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/58/6a/9166369a2f092bd286d24e6307de555d63616e8ddb373ebad2b5635ca4cd/ipywidgets-8.1.7-py3-none-any.whl", hash = "sha256:764f2602d25471c213919b8a1997df04bef869251db4ca8efba1b76b1bd9f7bb", size = 139806, upload-time = "2025-05-05T12:41:56.833Z" },
+]
+
+[[package]]
+name = "isort"
+version = "7.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/63/53/4f3c058e3bace40282876f9b553343376ee687f3c35a525dc79dbd450f88/isort-7.0.0.tar.gz", hash = "sha256:5513527951aadb3ac4292a41a16cbc50dd1642432f5e8c20057d414bdafb4187", size = 805049, upload-time = "2025-10-11T13:30:59.107Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7f/ed/e3705d6d02b4f7aea715a353c8ce193efd0b5db13e204df895d38734c244/isort-7.0.0-py3-none-any.whl", hash = "sha256:1bcabac8bc3c36c7fb7b98a76c8abb18e0f841a3ba81decac7691008592499c1", size = 94672, upload-time = "2025-10-11T13:30:57.665Z" },
 ]
 
 [[package]]
@@ -2190,7 +2188,7 @@ dependencies = [
     { name = "duckdb" },
     { name = "emoji" },
     { name = "gspread" },
-    { name = "gspread-formatting" },
+    { name = "isort" },
     { name = "modal" },
     { name = "pandas" },
     { name = "python-dotenv" },
@@ -2202,6 +2200,12 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "ipykernel" },
+    { name = "pytest" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
 ]
 
 [package.metadata]
@@ -2210,13 +2214,17 @@ requires-dist = [
     { name = "duckdb", specifier = ">=1.4.0" },
     { name = "emoji", specifier = ">=2.14.1" },
     { name = "gspread", specifier = ">=6.1.4" },
-    { name = "gspread-formatting", specifier = ">=1.2.0" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29.5" },
+    { name = "isort", specifier = ">=7.0.0" },
     { name = "modal", specifier = ">=1.0.0" },
     { name = "pandas", specifier = ">=2.2.3" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "sqlfluff", specifier = ">=3.3.0" },
     { name = "sqlmesh", extras = ["web"], specifier = ">=0.186.1" },
     { name = "urllib3", specifier = ">=2.3.0" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.4.1" }]
