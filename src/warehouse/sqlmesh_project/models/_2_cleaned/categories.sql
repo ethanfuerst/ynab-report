@@ -9,7 +9,7 @@ select
     , category_group_id
     , trim(
         regexp_replace(
-            regexp_replace(name, '[^\pL\pN\s.&/]+', ' ', 'g'),
+            regexp_replace(name, '[^\pL\pN\s.&/+]+', ' ', 'g'),
             '\s+',
             ' ',
             'g'
