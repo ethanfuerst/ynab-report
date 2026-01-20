@@ -117,7 +117,7 @@ select
     , coalesce(monthly_paystubs.net_pay, 0) as net_pay
     , coalesce(monthly_paystubs.income_for_reimbursements, 0) as income_for_reimbursements
     , coalesce(coalesce(monthly_transactions.income, 0) - coalesce(monthly_paystubs.net_pay, 0), 0) as misc_income
-    , coalesce(coalesce(net_pay, 0) + coalesce(misc_income, 0), 0) as total_income
+    , coalesce(monthly_transactions.income, 0) as total_income
     , coalesce(monthly_transactions.needs_spend, 0) as needs_spend
     , coalesce(monthly_transactions.wants_spend, 0) as wants_spend
     , coalesce(monthly_transactions.savings_spend, 0) as savings_spend
