@@ -3,7 +3,7 @@ from sqlmesh import macro
 
 @macro()
 def try_cast_to_float(evaluator, column_name: str):
-    return f'coalesce(try_cast({column_name} as float), 0)'
+    return f'coalesce(try_cast({column_name} as decimal), 0)'
 
 
 @macro()
