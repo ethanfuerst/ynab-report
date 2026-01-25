@@ -3,26 +3,11 @@ MODEL (
   kind FULL,
   grain (file_name, pay_period_start_date),
   audits (
-    -- Earnings components sum to earnings total
-    forall(criteria := (
-      earnings_salary + earnings_bonus + earnings_meal_allowance + earnings_pto_payout + earnings_severance + earnings_misc + earnings_expense_reimbursement + earnings_nyc_citi_bike = earnings_total
-    )),
-    -- Pre-tax components sum to pre-tax total
-    forall(criteria := (
-      pre_tax_401k + pre_tax_hsa + pre_tax_fsa + pre_tax_medical = pre_tax_deductions_total
-    )),
-    -- Tax components sum to taxes total
-    forall(criteria := (
-      taxes_medicare + taxes_federal + taxes_state + taxes_city + taxes_nypfl + taxes_disability + taxes_social_security = taxes_total
-    )),
-    -- Post-tax components sum to post-tax total
-    forall(criteria := (
-      post_tax_meal_allowance_offset + post_tax_roth + post_tax_critical_illness + post_tax_ad_d + post_tax_long_term_disability + post_tax_citi_bike = post_tax_deductions_total
-    )),
-    -- on sheet calcs are added together correctly
-    forall(criteria := (
-        net_pay_total + pre_tax_deductions_total + taxes_total + post_tax_deductions_total = earnings_total
-    ))
+    paystubs_earnings_components_sum_to_total,
+    paystubs_pre_tax_components_sum_to_total,
+    paystubs_tax_components_sum_to_total,
+    paystubs_post_tax_components_sum_to_total,
+    paystubs_net_pay_plus_deductions_equals_earnings
   )
 );
 
