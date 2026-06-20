@@ -10,10 +10,8 @@ with date_spine as (
     from generate_series(
         least(
             (select min(transaction_date) from cleaned.transactions)
-            , (select min(trade_date) from cleaned.investment_transactions)
             , (select min(budget_month) from cleaned.monthly_categories)
             , (select min(pay_date) from cleaned.paystubs)
-            , (select min(transaction_date) from cleaned.btc_wallet_history)
         )::date
         , current_date::date
         , interval '1 day'
@@ -26,12 +24,6 @@ with date_spine as (
     where transaction_date is not null
 )
 
-, investment_dates as (
-    select distinct trade_date as date
-    from cleaned.investment_transactions
-    where trade_date is not null
-)
-
 , paystub_dates as (
     select distinct pay_date as date
     from cleaned.paystubs
@@ -41,10 +33,8 @@ with date_spine as (
 select
     d.date
     , b.date is not null as has_budget_data
-    , i.date is not null as has_investment_data
     , p.date is not null as has_paystub_data
 from date_spine as d
 left join budget_dates as b on b.date = d.date
-left join investment_dates as i on i.date = d.date
 left join paystub_dates as p on p.date = d.date
 order by d.date
