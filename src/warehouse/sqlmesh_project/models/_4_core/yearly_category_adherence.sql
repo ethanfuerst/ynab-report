@@ -13,9 +13,7 @@ MODEL (
 with category_years as (
     /*
         Per-category, per-year net activity and assigned dollars for the Needs
-        and Wants buckets only. Investments adherence comes from
-        core.yearly_investment_contributions; all other groups are excluded per
-        the §5 mapping.
+        and Wants buckets only. All other groups are excluded per the §5 mapping.
 
         Join monthly_categories.category_group_id directly to
         category_groups.id — hopping through cleaned.categories would pull the

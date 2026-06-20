@@ -30,8 +30,7 @@ with bucket_projected as (
     /*
         Unpivot the §1 50/30/20 targets into one row per (year, bucket) so the
         rollup joins on a single key. The Investments target is intentionally
-        excluded — Investments adherence is tracked by
-        core.yearly_investment_contributions, not here.
+        excluded — this model tracks Needs/Wants adherence only.
     */
     select year, 'Needs' as bucket, needs_target as target
     from core.yearly_income_derivation
