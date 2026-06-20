@@ -167,24 +167,19 @@ INCOME_DERIVATION_COLUMN_TITLES = [
     'Wants Target (30%)',
     'Investments Target (15%)',
     'Savings Target (5%)',
-    'Match Milestone Hit',
-    '401k Employee Remaining',
     'Net Income',
     'Data Type',
 ]
 INCOME_DERIVATION_FORMAT = {
-    'B2:O2': HEADER_FORMAT,
+    'B2:M2': HEADER_FORMAT,
     'B3:B': {'horizontalAlignment': 'RIGHT'},
-    'C3:K': CURRENCY_FORMAT,
-    'M3:N': CURRENCY_FORMAT,
+    'C3:L': CURRENCY_FORMAT,
 }
 INCOME_DERIVATION_NOTES = {
     'F2': 'Net-to-account one-off income (bonus, refunds, interest, cashback). '
     'Actual YTD, never extrapolated; does not feed Allocatable Income.',
     'G2': 'Salary - Estimated Tax - HSA. Bucket targets split this 50/30/15/5.',
-    'L2': '401k employee elective-limit hit; closest available proxy for '
-    'capturing the full employer match.',
-    'N2': 'Total Income (Net to Account) - Total Spend. Red when in deficit.',
+    'L2': 'Total Income (Net to Account) - Total Spend. Red when in deficit.',
 }
 INCOME_DERIVATION_COLUMN_WIDTH_MAPPING = {
     'A': 21,
@@ -198,11 +193,9 @@ INCOME_DERIVATION_COLUMN_WIDTH_MAPPING = {
     'I': 100,
     'J': 110,
     'K': 100,
-    'L': 95,
-    'M': 110,
-    'N': 100,
-    'O': 95,
-    'P': 21,
+    'L': 100,
+    'M': 95,
+    'N': 21,
 }
 
 # Tab 2 — Bucket Adherence (dashboards.bucket_adherence); columns B..H
@@ -220,9 +213,8 @@ BUCKET_ADHERENCE_COLUMN_FORMATS = {
     'Overage %': PERCENT_FORMAT,
 }
 BUCKET_ADHERENCE_NOTES = {
-    'C2': 'Needs/Wants are less-is-good; Investments/Savings are more-is-good. '
+    'C2': 'Needs/Wants are less-is-good; Savings is more-is-good. '
     'Rows turn orange when off plan.',
-    'D2': 'Investments target includes the §8 extra-income surplus.',
 }
 BUCKET_ADHERENCE_COLUMN_WIDTH_MAPPING = {
     'A': 21,
@@ -255,62 +247,7 @@ EXTRA_INCOME_ALLOCATION_COLUMN_FORMATS = {
     'Surplus to Investments': CURRENCY_FORMAT,
 }
 
-# Tab 3 — Investments (dashboards.investments); columns B..Q
-INVESTMENTS_COLUMN_TITLES = [
-    '401k Contributions',
-    '401k Employee Contributions',
-    'Taxable Contributions',
-    'Total Invested',
-    '401k Contribution Limit',
-    '401k Limit Hit',
-    '401k Split Target',
-    'Taxable Split Target',
-    '401k Split %',
-    'Taxable Split %',
-    'Investments Target (15%)',
-    'Remaining to Target',
-    'Extra Income Surplus',
-    'Emergency Top-Ups',
-    'Data Type',
-]
-INVESTMENTS_FORMAT = {
-    'B2:Q2': HEADER_FORMAT,
-    'B3:B': {'horizontalAlignment': 'RIGHT'},
-    'C3:G': CURRENCY_FORMAT,
-    'I3:J': CURRENCY_FORMAT,
-    'K3:L': PERCENT_FORMAT,
-    'M3:P': CURRENCY_FORMAT,
-}
-INVESTMENTS_NOTES = {
-    'F2': '401k Contributions + Taxable Contributions.',
-    'H2': '401k employee elective-deferral limit reached.',
-    'I2': '50/50 split of the target with employee-limit spillover to taxable.',
-    'M2': '15% of Allocatable Income plus the §8 extra-income surplus is the '
-    'with-surplus target tracked on the Bucket Adherence tab.',
-    'P2': 'Extra income recognized as Emergency Fund contributions (§8 priority 1).',
-}
-INVESTMENTS_COLUMN_WIDTH_MAPPING = {
-    'A': 21,
-    'B': 60,
-    'C': 110,
-    'D': 120,
-    'E': 110,
-    'F': 100,
-    'G': 110,
-    'H': 80,
-    'I': 100,
-    'J': 100,
-    'K': 80,
-    'L': 80,
-    'M': 110,
-    'N': 100,
-    'O': 100,
-    'P': 100,
-    'Q': 95,
-    'R': 21,
-}
-
-# Tab 4 — Category Drilldown (dashboards.category_drilldown); columns B..H
+# Tab 3 — Category Drilldown (dashboards.category_drilldown); columns B..H
 CATEGORY_DRILLDOWN_COLUMN_TITLES = [
     'Bucket',
     'Category',
@@ -341,7 +278,7 @@ CATEGORY_DRILLDOWN_COLUMN_WIDTH_MAPPING = {
     'I': 21,
 }
 
-# Tab 5 — Runway (dashboards.runway); columns B..K + sparkline at M
+# Tab 4 — Runway (dashboards.runway); columns B..K + sparkline at M
 RUNWAY_COLUMN_TITLES = [
     'Liquid Cash',
     'Emergency Fund Balance',

@@ -9,7 +9,6 @@ from eftoolkit.utils import setup_logging
 from src.sheets.worksheets.bucket_adherence import BucketAdherenceWorksheet
 from src.sheets.worksheets.category_drilldown import CategoryDrilldownWorksheet
 from src.sheets.worksheets.income_derivation import IncomeDerivationWorksheet
-from src.sheets.worksheets.investments import InvestmentsWorksheet
 from src.sheets.worksheets.overview import (
     OverviewMonthlyWorksheet,
     OverviewYearlyWorksheet,
@@ -38,7 +37,6 @@ def refresh_sheets(env: str = 'prod') -> None:
                 OverviewMonthlyWorksheet(),
                 IncomeDerivationWorksheet(),
                 BucketAdherenceWorksheet(),
-                InvestmentsWorksheet(),
                 CategoryDrilldownWorksheet(),
                 RunwayWorksheet(),
             ],

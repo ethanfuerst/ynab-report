@@ -6,7 +6,7 @@ MODEL (
     not_null(columns := (year, category_id)),
     unique_combination_of_columns(columns := (year, category_id))
   ),
-  description 'Tab 4 (ETH-472): per-year, per-category Needs/Wants drilldown — spend, current-year projection, and share of bucket. Passthrough of core.yearly_category_adherence; category_id is the grain key and is dropped at render time.'
+  description 'Tab 3 (ETH-472): per-year, per-category Needs/Wants drilldown — spend, current-year projection, and share of bucket. Passthrough of core.yearly_category_adherence; category_id is the grain key and is dropped at render time.'
 );
 
 select

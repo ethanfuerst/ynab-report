@@ -16,12 +16,12 @@ from tests.sheets.fakes import FakeDuckDB, RecordingWorksheet
 def income_df():
     return pd.DataFrame(
         [
-            [2024] + [100.0] * 9 + [True, 0.0, -50.0, False],
-            [2025] + [100.0] * 9 + [False, None, 50.0, True],
+            [2024] + [100.0] * 9 + [-50.0, False],
+            [2025] + [100.0] * 8 + [None] + [50.0, True],
         ],
         columns=['year']
         + [f'c{i}' for i in range(9)]
-        + ['match_milestone_hit', 'remaining', 'net_income', 'is_extrapolated'],
+        + ['net_income', 'is_extrapolated'],
     )
 
 
@@ -49,7 +49,7 @@ def test_generate_converts_extrapolated_flag_and_nan(income_df):
     df = ws.generate({'db': db, 'sheet_name': 'Test'}, {})[0].df
 
     assert df['Data Type'].tolist() == ['Actual', 'Extrapolated']
-    assert df['401k Employee Remaining'].tolist() == [0.0, 'N/A']
+    assert df['Savings Target (5%)'].tolist() == [100.0, 'N/A']
 
 
 def test_format_and_stamp_hook_applies_format_and_timestamp(income_df):
@@ -67,8 +67,8 @@ def test_format_and_stamp_hook_applies_format_and_timestamp(income_df):
     asset.post_write_hooks[0](ctx)
 
     format_ranges = {call[0] for call in fake_ws.format_calls}
-    assert 'B2:O2' in format_ranges
-    assert 'C3:K' in format_ranges
+    assert 'B2:M2' in format_ranges
+    assert 'C3:L' in format_ranges
     assert fake_ws.values_writes[0][0] == 'B1'
     assert fake_ws.values_writes[0][1][0][0].startswith('Last Updated: ')
 
@@ -101,15 +101,15 @@ def test_get_formatting_includes_red_deficit_rule(income_df):
     assert formatting is not None
     assert formatting.conditional_formats == [
         {
-            'range': 'N3:N4',
+            'range': 'L3:L4',
             'type': 'CUSTOM_FORMULA',
-            'values': ['=$N3<0'],
+            'values': ['=$L3<0'],
             'format': {'backgroundColor': DEFICIT_RED_FILL},
         }
     ]
     assert formatting.notes == INCOME_DERIVATION_NOTES
     assert formatting.column_widths == INCOME_DERIVATION_COLUMN_WIDTH_MAPPING
-    assert formatting.auto_resize_columns == (2, 16)
+    assert formatting.auto_resize_columns == (2, 14)
 
 
 def test_get_formatting_returns_none_without_assets():

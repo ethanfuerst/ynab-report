@@ -6,7 +6,7 @@ MODEL (
     not_null(columns := (year)),
     unique_values(columns := (year))
   ),
-  description 'Tab 5 (ETH-472): per-year runway snapshot — liquid cash, primary reserve (emergency_fund_balance), secondary reserve (hsa_reimbursable_reserve), the three runway views, worst runway, and zone. Passthrough of core.yearly_runway; the monthly sparkline series reads core.monthly_runway directly (documented exception).'
+  description 'Tab 4 (ETH-472): per-year runway snapshot — liquid cash, primary reserve (emergency_fund_balance), secondary reserve (hsa_reimbursable_reserve), the three runway views, worst runway, and zone. Passthrough of core.yearly_runway; the monthly sparkline series reads core.monthly_runway directly (documented exception).'
 );
 
 select

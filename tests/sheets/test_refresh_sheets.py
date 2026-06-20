@@ -5,7 +5,6 @@ from src.sheets.refresh_sheets import refresh_sheets
 from src.sheets.worksheets.bucket_adherence import BucketAdherenceWorksheet
 from src.sheets.worksheets.category_drilldown import CategoryDrilldownWorksheet
 from src.sheets.worksheets.income_derivation import IncomeDerivationWorksheet
-from src.sheets.worksheets.investments import InvestmentsWorksheet
 from src.sheets.worksheets.overview import (
     OverviewMonthlyWorksheet,
     OverviewYearlyWorksheet,
@@ -27,7 +26,7 @@ class _RecordingRunner:
         self.run_called = True
 
 
-def test_refresh_sheets_registers_all_seven_worksheets(monkeypatch):
+def test_refresh_sheets_registers_all_six_worksheets(monkeypatch):
     monkeypatch.setenv('GSPREAD_CREDENTIALS', '{"type": "service_account"}')
 
     @contextmanager
@@ -48,7 +47,6 @@ def test_refresh_sheets_registers_all_seven_worksheets(monkeypatch):
         OverviewMonthlyWorksheet,
         IncomeDerivationWorksheet,
         BucketAdherenceWorksheet,
-        InvestmentsWorksheet,
         CategoryDrilldownWorksheet,
         RunwayWorksheet,
     ]

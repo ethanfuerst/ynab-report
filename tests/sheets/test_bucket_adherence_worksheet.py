@@ -19,7 +19,6 @@ def buckets_df():
         [
             [2025, 'Needs', 100.0, 90.0, -0.10, True, True],
             [2025, 'Wants', 60.0, 70.0, 0.1667, False, True],
-            [2025, 'Investments', 30.0, 35.0, 0.1667, True, True],
             [2025, 'Savings', 10.0, None, None, None, True],
         ],
         columns=[
@@ -75,9 +74,9 @@ def test_generate_keeps_on_plan_booleans_and_converts_nan(buckets_df, alloc_df):
 
     asset_a = ws.generate({'db': db, 'sheet_name': 'Test'}, {})[0]
 
-    assert asset_a.df['On Plan'].tolist() == [True, False, True, 'N/A']
-    assert asset_a.df['Projected'].tolist() == [90.0, 70.0, 35.0, 'N/A']
-    assert asset_a.df['Data Type'].tolist() == ['Extrapolated'] * 4
+    assert asset_a.df['On Plan'].tolist() == [True, False, 'N/A']
+    assert asset_a.df['Projected'].tolist() == [90.0, 70.0, 'N/A']
+    assert asset_a.df['Data Type'].tolist() == ['Extrapolated'] * 3
 
 
 def test_bucket_hook_formats_columns_and_stamps(buckets_df, alloc_df):
@@ -96,8 +95,8 @@ def test_bucket_hook_formats_columns_and_stamps(buckets_df, alloc_df):
 
     format_ranges = {call[0] for call in fake_ws.format_calls}
     assert 'B2:H2' in format_ranges  # header
-    assert 'D3:D6' in format_ranges  # Target currency
-    assert 'F3:F6' in format_ranges  # Overage % percent
+    assert 'D3:D5' in format_ranges  # Target currency
+    assert 'F3:F5' in format_ranges  # Overage % percent
     assert fake_ws.values_writes[0][0] == 'B1'
 
 
@@ -132,7 +131,7 @@ def test_get_formatting_includes_orange_off_plan_rule(buckets_df, alloc_df):
     assert formatting is not None
     assert formatting.conditional_formats == [
         {
-            'range': 'B3:H6',
+            'range': 'B3:H5',
             'type': 'CUSTOM_FORMULA',
             'values': ['=$G3=FALSE'],
             'format': {'backgroundColor': OFF_PLAN_ORANGE_FILL},

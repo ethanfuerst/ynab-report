@@ -9,7 +9,7 @@ MODEL (
     yearly_extra_income_allocation_savings_on_plan_consistency,
     yearly_extra_income_allocation_overage_on_plan_consistency
   ),
-  description 'Per-year §8 extra-income patch: waterfalls extra_income (§1 net one-off inflows) across Emergency Fund contributions → Needs overage → Wants overage → Savings coverage → Investments surplus. Emits the five patch figures (which sum to extra_income) plus the coverage-adjusted savings net_saved / on_plan and the per-bucket on-plan-after-allocation flags (needs/wants on plan when the patch fully absorbed the overage; savings on plan when net_saved_after_coverage >= target). The Investments on-plan-after-surplus flag lives in core.yearly_investment_contributions (importing investment actuals here would form a cycle). extra_income_used_for_emergency_fund_contributions is priority 1, funded off the top of extra_income and capped at emergency_fund_assigned (gross Emergency Fund group assignments per core.monthly_budgeted = the _5 dashboards emergency_fund_saved figure, actual YTD, not extrapolated): the full EF top-up made that year is recognized first whenever extra_income covers it. Overage patches do NOT inflate Needs/Wants targets (buckets stay flagged in core.yearly_bucket_adherence). Savings coverage credits covered (actual-YTD) spend back without raising any target/goal. extra_income_surplus_to_investments feeds core.yearly_investment_contributions (ETH-470 step 4), where it augments the salary-based investments_target and re-splits 50/50 with employee-limit spillover.'
+  description 'Per-year §8 extra-income patch: waterfalls extra_income (§1 net one-off inflows) across Emergency Fund contributions → Needs overage → Wants overage → Savings coverage → Investments surplus. Emits the five patch figures (which sum to extra_income) plus the coverage-adjusted savings net_saved / on_plan and the per-bucket on-plan-after-allocation flags (needs/wants on plan when the patch fully absorbed the overage; savings on plan when net_saved_after_coverage >= target). extra_income_used_for_emergency_fund_contributions is priority 1, funded off the top of extra_income and capped at emergency_fund_assigned (gross Emergency Fund group assignments per core.monthly_budgeted = the _5 dashboards emergency_fund_saved figure, actual YTD, not extrapolated): the full EF top-up made that year is recognized first whenever extra_income covers it. Overage patches do NOT inflate Needs/Wants targets (buckets stay flagged in core.yearly_bucket_adherence). Savings coverage credits covered (actual-YTD) spend back without raising any target/goal. extra_income_surplus_to_investments is the terminal residual that makes the five outputs conserve to extra_income (notionally the amount left to invest); it has no downstream consumer.'
 );
 
 with emergency_assigned as (
@@ -152,7 +152,8 @@ select
     , extra_income_used_for_needs_overage
     , extra_income_used_for_wants_overage
     , extra_income_used_for_savings_coverage
-    /* Priority 5: surplus absorbs the remainder; the five outputs sum to extra_income. */
+    /* Priority 5: surplus absorbs the remainder (notionally the amount left to invest);
+       the five outputs sum to extra_income. */
     , round(remaining_after_wants - extra_income_used_for_savings_coverage, 2)
         as extra_income_surplus_to_investments
     /* Coverage-adjusted savings net saved (computed from the pre-coverage savings model's components). */
@@ -169,9 +170,7 @@ select
         Per-bucket on-plan-after-allocation flags (one per budget bucket).
         Needs/Wants are less-is-good: on plan when the extra-income patch fully
         absorbed the overage (post-patch effective spend <= target). Null when the
-        bucket has no target (no data). The Investments flag lives in
-        core.yearly_investment_contributions (it needs investment actuals, which
-        would form a circular dependency if imported here).
+        bucket has no target (no data).
     */
     , case
         when needs_target = 0 then null
