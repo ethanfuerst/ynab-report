@@ -35,10 +35,12 @@ with monthly_base as (
     from core.monthly_adherance
 )
 
-, monthly_assigned as (
+, monthly_assignments as (
     select
         budget_month
         , coalesce(sum(assigned), 0)::decimal as total_assigned  -- Net dollars assigned in the budget month, positive/negative USD
+        , coalesce(sum(if(category_group_name_mapping = 'Credit Card Payments', assigned, 0)), 0)::decimal as credit_card_assigned  -- Credit card debt paydown assignments, funded by credit overspending rather than income, positive/negative USD
+        , coalesce(sum(if(category_group_name_mapping in ('Needs', 'Wants'), balance, 0)), 0)::decimal as needs_wants_balance  -- Needs and Wants available balance at month end, positive/negative USD
     from combined.monthly_budgeted
     group by budget_month
 )
@@ -70,8 +72,10 @@ with monthly_base as (
         , monthly_base.savings_saved_over_target
         , monthly_base.actual_rollover
         , monthly_base.monthly_cash_spend
-        , coalesce(monthly_assigned.total_assigned, 0)::decimal as total_assigned
-        , greatest(coalesce(monthly_base.net_income_to_account, 0) - coalesce(monthly_assigned.total_assigned, 0), 0)::decimal as runway_cash_saved
+        , coalesce(monthly_assignments.total_assigned, 0)::decimal as total_assigned
+        , coalesce(monthly_assignments.credit_card_assigned, 0)::decimal as credit_card_assigned
+        , coalesce(monthly_assignments.needs_wants_balance, 0)::decimal as needs_wants_balance
+        , greatest(coalesce(monthly_base.net_income_to_account, 0) - coalesce(monthly_assignments.total_assigned, 0), 0)::decimal as runway_cash_saved
         , count(monthly_base.monthly_cash_spend) over (order by monthly_base.budget_month rows between 3 preceding and 1 preceding) as complete_months_in_runway_average
         , avg(monthly_base.monthly_cash_spend) over (order by monthly_base.budget_month rows between 3 preceding and 1 preceding) as prior_avg_monthly_cash_spend_3mo
         , count(monthly_base.monthly_cash_spend) over (
@@ -89,8 +93,8 @@ with monthly_base as (
             rows between 6 preceding and 1 preceding
         ) as trailing_6mo_buffer_average
     from monthly_base
-    left join monthly_assigned
-        on monthly_base.budget_month = monthly_assigned.budget_month
+    left join monthly_assignments
+        on monthly_base.budget_month = monthly_assignments.budget_month
 )
 
 , runway_targets as (
@@ -121,6 +125,8 @@ with monthly_base as (
         , actual_rollover
         , monthly_cash_spend
         , total_assigned
+        , credit_card_assigned
+        , needs_wants_balance
         , runway_cash_saved
         , complete_months_in_runway_average
         , case
@@ -164,6 +170,8 @@ with monthly_base as (
         , actual_rollover
         , monthly_cash_spend
         , total_assigned
+        , credit_card_assigned
+        , needs_wants_balance
         , buffer_target_saved
         , runway_cash_saved
         , avg_complete_monthly_cash_spend_3mo
@@ -193,13 +201,24 @@ with monthly_base as (
 , buffer_running as (
     select
         overflow_months.*
-        , coalesce(
-            sum(overflow_dollars_saved) over (order by budget_month rows between unbounded preceding and 1 preceding),
-            0
-        )::decimal as starting_buffer_balance_saved  -- Running overflow balance before this month, positive/negative USD
+        , (
+            coalesce(lag(needs_wants_balance) over (order by budget_month), 0)
+            + coalesce(
+                sum(net_income_to_account) over (order by budget_month rows between unbounded preceding and 1 preceding),
+                0
+            )
+            - coalesce(
+                sum(total_assigned - credit_card_assigned) over (order by budget_month rows between unbounded preceding and 1 preceding),
+                0
+            )
+        )::decimal as starting_buffer_balance_saved  -- Buffer Balance at the end of the prior month, positive/negative USD
         , sum(overflow_dollars_saved) over (order by budget_month rows between unbounded preceding and current row)::decimal as running_overflow_balance_saved  -- Running total of monthly overflow dollars, positive/negative USD
         , sum(hsa_reimbursement_eligible_saved) over (order by budget_month rows between unbounded preceding and current row)::decimal as hsa_reimbursement_value_saved  -- Running HSA-reimbursable spend preserved for future reimbursement, positive USD
-        , 0::decimal as buffer_balance_saved  -- Placeholder while buffer balance logic is being reconsidered
+        , (
+            needs_wants_balance
+            + sum(net_income_to_account) over (order by budget_month rows between unbounded preceding and current row)
+            - sum(total_assigned - credit_card_assigned) over (order by budget_month rows between unbounded preceding and current row)
+        )::decimal as buffer_balance_saved  -- Month-end Needs and Wants available plus income received but not yet assigned to any month through month end; credit card debt assignments excluded because credit overspending funds them, not income
     from overflow_months
 )
 
@@ -208,19 +227,25 @@ with monthly_base as (
         buffer_running.*
         , case
             when buffer_target_saved is null then null
-            else buffer_target_saved
-        end as buffer_gap_saved  -- Additional Needs and Wants available needed to cover the YNAB target total, positive USD
-        , 0::decimal as buffer_surplus_saved  -- Placeholder while buffer surplus logic is being reconsidered
+            else greatest(buffer_target_saved - buffer_balance_saved, 0)::decimal
+        end as buffer_gap_saved  -- Additional Buffer Balance needed to cover the one-month Buffer Target, positive USD
+        , case
+            when buffer_target_saved is null then null
+            else buffer_balance_saved - buffer_target_saved
+        end as buffer_surplus_saved  -- Buffer Balance minus Buffer Target; positive is over target and negative is under target
         , case
             when buffer_target_saved is null then null
             else least(
                 greatest(overflow_dollars_saved, 0),
-                buffer_target_saved
+                greatest(buffer_target_saved - buffer_balance_saved, 0)
             )::decimal
         end as overflow_to_buffer_saved  -- Current-month overflow dollars needed to fill the buffer gap, positive USD
-        , 0::decimal as used_from_buffer_saved  -- Placeholder while buffer balance logic is being reconsidered
-        , greatest(greatest(overflow_dollars_saved * -1, 0), 0)::decimal as uncovered_shortfall_spend  -- Negative current-month overflow not covered by a defined buffer balance, positive USD spend
-        , 0::decimal as true_excess_saved  -- Placeholder while buffer surplus logic is being reconsidered
+        , least(greatest(overflow_dollars_saved * -1, 0), greatest(starting_buffer_balance_saved, 0))::decimal as used_from_buffer_saved  -- Negative current-month overflow covered by the starting Buffer Balance, positive USD
+        , greatest(greatest(overflow_dollars_saved * -1, 0) - greatest(starting_buffer_balance_saved, 0), 0)::decimal as uncovered_shortfall_spend  -- Negative current-month overflow not covered by the starting Buffer Balance, positive USD spend
+        , case
+            when buffer_target_saved is null then null
+            else greatest(buffer_balance_saved - buffer_target_saved, 0)::decimal
+        end as true_excess_saved  -- Buffer Balance above the one-month Buffer Target, positive USD
         , case when buffer_target_saved is null then null else buffer_target_saved * 3 end as emergency_fund_target_saved  -- Emergency Fund target at three times the Buffer Target, positive USD
         , case
             when buffer_target_saved is null then null
@@ -232,8 +257,8 @@ with monthly_base as (
         end as emergency_fund_surplus_saved  -- Emergency Fund balance minus the three-month target, positive/negative USD
         , case
             when buffer_target_saved is null then null
-            else coalesce(emergency_fund_balance, 0) - buffer_target_saved * 3
-        end as reserve_surplus_saved  -- Cash Emergency Fund surplus while Buffer Surplus is temporarily zero, positive/negative USD
+            else coalesce(emergency_fund_balance, 0) - buffer_target_saved * 3 + (buffer_balance_saved - buffer_target_saved)
+        end as reserve_surplus_saved  -- Combined cash reserve surplus after applying Emergency Fund surplus against Buffer shortfall, positive/negative USD
         , (coalesce(savings_rolling_balance_saved, 0) - coalesce(emergency_fund_balance, 0))::decimal as other_savings_balance_saved  -- Savings balance outside the Emergency Fund bucket, USD
     from buffer_running
 )
@@ -295,18 +320,18 @@ select
     , greatest(coalesce(target_investments_saved, 0), 0) + least(coalesce(actual_investments_saved, 0) * -1, 0) as investments_surplus_saved  -- Investments target plus signed saved amount; positive is remaining target and negative is over target
     , overflow_dollars_saved  -- Income left after Needs, Wants, Savings saved, and Investments saved, positive/negative USD
     , buffer_target_saved  -- Average Needs and Wants spend from the current year or trailing six complete months, positive USD
-    , buffer_balance_saved  -- Current-month Needs and Wants available balance, positive/negative USD
-    , buffer_gap_saved  -- Additional rolling overflow dollars needed to cover the one-month buffer, positive USD
-    , buffer_surplus_saved  -- Running buffer balance minus the one-month buffer target, positive/negative USD
+    , buffer_balance_saved  -- Month-end Needs and Wants available plus income banked for future months, positive/negative USD
+    , buffer_gap_saved  -- Additional Buffer Balance needed to cover the one-month Buffer Target, positive USD
+    , buffer_surplus_saved  -- Buffer Balance minus Buffer Target; positive is over target and negative is under target
     , overflow_to_buffer_saved  -- Current-month overflow dollars needed to fill the one-month buffer gap, positive USD
     , used_from_buffer_saved  -- Negative current-month overflow covered by the starting buffer balance, positive USD
     , uncovered_shortfall_spend  -- Negative current-month overflow not covered by the starting buffer balance, positive USD spend
-    , true_excess_saved  -- Rolling buffer balance above the one-month buffer target, positive USD
+    , true_excess_saved  -- Buffer Balance above the one-month Buffer Target, positive USD
     , emergency_fund_balance  -- Emergency Fund category balance at month end, positive USD
     , emergency_fund_target_saved  -- Emergency Fund target at three times the Buffer Target, positive USD
     , emergency_fund_gap_saved  -- Additional Emergency Fund balance needed to hit the three-month target, positive USD
     , emergency_fund_surplus_saved  -- Emergency Fund balance minus the three-month target, positive/negative USD
-    , reserve_surplus_saved  -- Combined Buffer and cash Emergency Fund balance minus their targets, positive/negative USD
+    , reserve_surplus_saved  -- Combined cash reserve surplus after applying Emergency Fund surplus against Buffer shortfall, positive/negative USD
     , hsa_reimbursement_value_saved  -- Running HSA-reimbursable spend preserved for future reimbursement, positive USD
     , other_savings_balance_saved  -- Savings balance outside the Emergency Fund bucket, USD
     , actual_rollover  -- Net-to-account income left after actual budget-account spend and budgeted saved amounts

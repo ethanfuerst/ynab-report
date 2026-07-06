@@ -131,6 +131,7 @@ with yearly_base as (
             , has_balanced_runway
             , row_number() over (partition by budget_year order by budget_month desc) as month_rank
         from monthly_waterfall_with_year
+        where budget_month <= date_trunc('month', current_date)
     )
     where month_rank = 1
 )
@@ -255,18 +256,18 @@ select
     , greatest(coalesce(target_investments_saved, 0), 0) + least(coalesce(actual_investments_saved, 0) * -1, 0) as investments_surplus_saved  -- Investments target plus signed saved amount; positive is remaining target and negative is over target
     , overflow_dollars_saved  -- Annual income left after Needs, Wants, Savings saved, and Investments saved, positive/negative USD
     , buffer_target_saved  -- Latest average Needs and Wants spend target in the year, positive USD
-    , buffer_balance_saved  -- Latest placeholder Buffer Balance in the year, currently zero
-    , buffer_gap_saved  -- Additional rolling overflow dollars needed to cover the one-month buffer, positive USD
-    , buffer_surplus_saved  -- Latest placeholder Buffer Surplus in the year, currently zero
+    , buffer_balance_saved  -- Latest month-end Buffer Balance in the year, positive/negative USD
+    , buffer_gap_saved  -- Latest additional Buffer Balance needed to cover the one-month Buffer Target, positive USD
+    , buffer_surplus_saved  -- Latest Buffer Balance minus Buffer Target; positive is over target and negative is under target
     , overflow_to_buffer_saved  -- Annual overflow dollars needed to fill the latest one-month buffer gap, positive USD
     , used_from_buffer_saved  -- Latest negative monthly overflow covered by the starting buffer balance, positive USD
     , uncovered_shortfall_spend  -- Latest negative monthly overflow not covered by the starting buffer balance, positive USD spend
-    , true_excess_saved  -- Latest rolling buffer balance above the one-month buffer target, positive USD
+    , true_excess_saved  -- Latest Buffer Balance above the one-month Buffer Target, positive USD
     , emergency_fund_balance  -- Latest Emergency Fund category balance in the year, positive USD
     , emergency_fund_target_saved  -- Latest Emergency Fund target at three times the Buffer Target, positive USD
     , emergency_fund_gap_saved  -- Additional Emergency Fund balance needed to hit the three-month target, positive USD
     , emergency_fund_surplus_saved  -- Latest Emergency Fund balance minus the three-month target, positive/negative USD
-    , reserve_surplus_saved  -- Combined Buffer and cash Emergency Fund balance minus their targets, positive/negative USD
+    , reserve_surplus_saved  -- Combined cash reserve surplus after applying Emergency Fund surplus against Buffer shortfall, positive/negative USD
     , hsa_reimbursement_value_saved  -- Latest running HSA-reimbursable spend preserved for future reimbursement, positive USD
     , other_savings_balance_saved  -- Latest Savings balance outside the Emergency Fund bucket, USD
     , actual_rollover  -- Net-to-account income left after actual budget-account spend and budgeted saved amounts
