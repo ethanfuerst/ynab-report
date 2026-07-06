@@ -203,6 +203,58 @@ with manual_links as (
     Step 7: combine the two row sources. All transactions (linked or not)
     plus all unmatched paystubs.
 */
-select * from transactions_with_paystubs
+select
+    ledger_date
+    , transaction_id
+    , paystub_file_name
+    , paystub_link_source
+    , transaction_amount_usd
+    , transaction_inflow_usd
+    , transaction_outflow_usd
+    , category_id
+    , category_name
+    , category_group_name_mapping
+    , subcategory_group_name
+    , account_name
+    , account_type
+    , memo
+    , earnings_actual
+    , salary
+    , bonus
+    , pre_tax_deductions_spend
+    , taxes_spend
+    , retirement_fund_saved
+    , hsa_saved
+    , post_tax_deductions_spend
+    , paycheck_withheld
+    , net_pay
+    , reimbursement_income
+from transactions_with_paystubs
 union all
-select * from orphan_paystubs
+select
+    ledger_date
+    , transaction_id
+    , paystub_file_name
+    , paystub_link_source
+    , transaction_amount_usd
+    , transaction_inflow_usd
+    , transaction_outflow_usd
+    , category_id
+    , category_name
+    , category_group_name_mapping
+    , subcategory_group_name
+    , account_name
+    , account_type
+    , memo
+    , earnings_actual
+    , salary
+    , bonus
+    , pre_tax_deductions_spend
+    , taxes_spend
+    , retirement_fund_saved
+    , hsa_saved
+    , post_tax_deductions_spend
+    , paycheck_withheld
+    , net_pay
+    , reimbursement_income
+from orphan_paystubs

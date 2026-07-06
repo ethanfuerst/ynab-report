@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 from eftoolkit.gsheets.runner import DashboardRunner
 from eftoolkit.utils import setup_logging
 
+from src.sheets.worksheets.adherance_waterfall import (
+    AdheranceWaterfallMonthlyWorksheet,
+    AdheranceWaterfallYearlyWorksheet,
+)
 from src.sheets.worksheets.overview import (
     OverviewMonthlyWorksheet,
     OverviewYearlyWorksheet,
@@ -31,6 +35,8 @@ def refresh_sheets(env: str = 'prod') -> None:
             worksheets=[
                 OverviewYearlyWorksheet(),
                 OverviewMonthlyWorksheet(),
+                AdheranceWaterfallYearlyWorksheet(),
+                AdheranceWaterfallMonthlyWorksheet(),
             ],
         )
         logging.info(f'Running dashboard refresh against {env} sheet ({sheet_name!r})')
