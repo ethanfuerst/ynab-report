@@ -29,9 +29,8 @@ with monthly_ledger as (
 )
 
 , monthly_date_spine as (
-    select distinct cast(date_trunc('month', date) as date) as budget_month
+    select distinct budget_month
     from combined.record_spine
-    where date >= (select min(date) from combined.record_spine where has_budget_data)
 )
 
 select
