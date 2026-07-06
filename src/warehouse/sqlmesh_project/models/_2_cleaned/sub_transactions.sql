@@ -2,7 +2,7 @@ MODEL (
   name cleaned.sub_transactions,
   kind FULL,
   grain id,
-  description 'Cleaned YNAB sub-transactions.'
+  description 'Cleaned YNAB sub-transactions. YNAB signs are normalized into positive inflow/outflow columns; dashboard signs are applied only in the dashboard layer.'
 );
 
 select
@@ -20,7 +20,9 @@ select
     , deleted  -- Whether the sub-transaction has been deleted
 
     /* Money */
-    , amount  -- Sub-transaction amount, milliunits (negative = outflow)
-    , amount / 10 as amount_cents  -- Amount in cents
-    , amount / 1000 as amount_usd  -- Amount in USD
+    , amount as ynab_amount_milliunits  -- Raw YNAB split amount in milliunits (positive = inflow, negative = outflow)
+    , abs(amount) / 10 as subtransaction_amount_cents  -- Absolute split amount in cents
+    , abs(amount) / 1000 as subtransaction_amount_usd  -- Absolute split amount in USD
+    , greatest(amount, 0) / 1000 as subtransaction_inflow_usd  -- Positive split inflow amount in USD
+    , abs(least(amount, 0)) / 1000 as subtransaction_outflow_usd  -- Positive split outflow amount in USD
 from raw.subtransactions

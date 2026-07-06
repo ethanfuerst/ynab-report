@@ -2,7 +2,7 @@ MODEL (
   name cleaned.monthly_categories,
   kind FULL,
   grain id,
-  description 'Cleaned YNAB monthly categories.'
+  description 'Cleaned YNAB monthly categories. YNAB activity signs are normalized into positive inflow/outflow columns; dashboard signs are applied only in the dashboard layer.'
 );
 
 select
@@ -35,13 +35,15 @@ select
     , goal_months_to_budget  -- Months remaining to fund the goal
 
     /* Money */
-    , budgeted  -- Amount budgeted to the category for the month, milliunits
-    , budgeted / 10 as budgeted_cents  -- Amount budgeted in cents
-    , budgeted / 1000 as budgeted_usd  -- Amount budgeted in USD
-    , activity  -- Net transaction activity for the month, milliunits
-    , activity / 10 as activity_cents  -- Activity in cents
-    , activity / 1000 as activity_usd  -- Activity in USD
-    , balance  -- Available balance at end of month, milliunits
+    , budgeted as assigned_milliunits  -- Net amount assigned to the category for the month, milliunits
+    , budgeted / 10 as assigned_cents  -- Net amount assigned in cents
+    , budgeted / 1000 as assigned_usd  -- Net amount assigned in USD
+    , activity as net_activity_milliunits  -- Net YNAB activity for the month, milliunits (positive = inflow, negative = outflow)
+    , abs(activity) / 10 as activity_amount_cents  -- Absolute activity in cents
+    , abs(activity) / 1000 as activity_amount_usd  -- Absolute activity in USD
+    , greatest(activity, 0) / 1000 as activity_inflow_usd  -- Positive activity inflow in USD
+    , abs(least(activity, 0)) / 1000 as activity_outflow_usd  -- Positive activity outflow in USD
+    , balance as balance_milliunits  -- Available balance at end of month, milliunits
     , balance / 10 as balance_cents  -- Available balance in cents
     , balance / 1000 as balance_usd  -- Available balance in USD
     , goal_target  -- Goal target amount, milliunits

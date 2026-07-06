@@ -9,7 +9,7 @@ MODEL (
     paystubs_post_tax_components_sum_to_total,
     paystubs_net_pay_plus_deductions_equals_earnings
   ),
-  description 'Cleaned paystubs: dates parsed and money values cast from string to float.'
+  description 'Cleaned paystubs: dates parsed and money values cast from string to float. Business money columns are positive; dashboard signs are applied only in the dashboard layer.'
 );
 
 with cleaned_paystubs_int as (
@@ -199,9 +199,9 @@ with cleaned_paystubs_int as (
             , 2
         ) as earnings_custom_calc_usd  -- Salary + bonus + PTO payout + severance, in USD
         , round(earnings_bonus_usd + earnings_pto_payout_usd + earnings_severance_usd, 2) as bonus_custom_calc_usd  -- Bonus + PTO payout + severance, in USD
-        , -1 * round(pre_tax_fsa_usd + pre_tax_medical_usd, 2) as pre_tax_deductions_custom_calc_usd  -- Pre-tax FSA + medical, signed negative, in USD
-        , -1 * round(post_tax_roth_401k_usd + post_tax_401k_after_tax_spillover_usd + post_tax_401k_after_tax_bonus_usd + pre_tax_401k_usd, 2) as retirement_fund_custom_calc_usd  -- Roth 401(k) + after-tax 401(k) spillover + after-tax 401(k) bonus + pre-tax 401(k), signed negative, in USD
-        , -1 * round(
+        , round(pre_tax_fsa_usd + pre_tax_medical_usd, 2) as pre_tax_deductions_spend_usd  -- Pre-tax FSA + medical paycheck deductions, positive USD spend
+        , round(post_tax_roth_401k_usd + post_tax_401k_after_tax_spillover_usd + post_tax_401k_after_tax_bonus_usd + pre_tax_401k_usd, 2) as retirement_fund_saved_usd  -- Roth 401(k) + after-tax 401(k) spillover + after-tax 401(k) bonus + pre-tax 401(k), positive USD saved
+        , round(
             taxes_medicare_usd
             + taxes_federal_usd
             + taxes_state_usd
@@ -210,14 +210,14 @@ with cleaned_paystubs_int as (
             + taxes_disability_usd
             + taxes_social_security_usd
             , 2
-        ) as taxes_custom_calc_usd  -- All taxes summed, signed negative, in USD
-        , -1 * pre_tax_hsa_usd as hsa_custom_calc_usd  -- HSA, signed negative, in USD
-        , -1 * round(
+        ) as taxes_spend_usd  -- All paycheck taxes summed, positive USD spend
+        , pre_tax_hsa_usd as hsa_saved_usd  -- HSA contribution, positive USD saved
+        , round(
             post_tax_critical_illness_usd
             + post_tax_ad_d_usd
             + post_tax_long_term_disability_usd
             , 2
-        ) as post_tax_deductions_custom_calc_usd  -- Insurance premiums summed, signed negative, in USD
+        ) as post_tax_deductions_spend_usd  -- Insurance premiums summed, positive USD spend
         , round(net_pay_total_usd - earnings_expense_reimbursement_usd, 2) as net_pay_custom_calc_usd  -- Net pay minus non-taxable reimbursements, in USD
     from cleaned_paystubs_int
 )
@@ -225,11 +225,11 @@ with cleaned_paystubs_int as (
 select
     *
     , round(
-        pre_tax_deductions_custom_calc_usd
-        + taxes_custom_calc_usd
-        + retirement_fund_custom_calc_usd
-        + hsa_custom_calc_usd
-        + post_tax_deductions_custom_calc_usd
+        pre_tax_deductions_spend_usd
+        + taxes_spend_usd
+        + retirement_fund_saved_usd
+        + hsa_saved_usd
+        + post_tax_deductions_spend_usd
         , 2
-    ) as deductions_custom_calc_usd  -- Sum of all custom-calc deductions (signed negative), in USD
+    ) as paycheck_withheld_usd  -- Total paycheck amount withheld from net pay, positive USD
 from final

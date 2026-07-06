@@ -2,7 +2,7 @@ MODEL (
   name cleaned.transactions,
   kind FULL,
   grain id,
-  description 'Cleaned YNAB transactions. Excludes rows without a category_id.'
+  description 'Cleaned YNAB transactions. Excludes rows without a category_id. YNAB signs are normalized into positive inflow/outflow columns; dashboard signs are applied only in the dashboard layer.'
 );
 
 select
@@ -32,9 +32,11 @@ select
     , deleted  -- Whether the transaction has been deleted
 
     /* Money */
-    , amount  -- Transaction amount, milliunits (negative = outflow)
-    , amount / 10 as amount_cents  -- Amount in cents
-    , amount / 1000 as amount_usd  -- Amount in USD
+    , amount as ynab_amount_milliunits  -- Raw YNAB amount in milliunits (positive = inflow, negative = outflow)
+    , abs(amount) / 10 as transaction_amount_cents  -- Absolute transaction amount in cents
+    , abs(amount) / 1000 as transaction_amount_usd  -- Absolute transaction amount in USD
+    , greatest(amount, 0) / 1000 as transaction_inflow_usd  -- Positive inflow amount in USD
+    , abs(least(amount, 0)) / 1000 as transaction_outflow_usd  -- Positive outflow amount in USD
 
     /* Derived columns */
     , strptime(date, '%Y-%m-%d') as transaction_date  -- Parsed transaction date
@@ -47,4 +49,4 @@ from raw.transactions
 where category_id is not null
 order by
     transaction_date desc
-    , amount_usd desc
+    , transaction_amount_usd desc

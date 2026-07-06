@@ -1,40 +1,21 @@
 MODEL (
   name combined.record_spine,
   kind FULL,
-  grain (date),
-  description 'Daily date spine from the earliest user-event date across cleaned models to today, flagged with which source had activity that day. Downstream models join/aggregate and filter on the flags (e.g. monthly_level keeps only months where has_budget_data is true).'
+  grain (budget_month, category_id)
 );
 
-with date_spine as (
-    select cast(days.generate_series as date) as date
-    from generate_series(
-        least(
-            (select min(transaction_date) from cleaned.transactions)
-            , (select min(budget_month) from cleaned.monthly_categories)
-            , (select min(pay_date) from cleaned.paystubs)
-        )::date
-        , current_date::date
-        , interval '1 day'
-    ) as days
-)
-
-, budget_dates as (
-    select distinct transaction_date as date
-    from cleaned.transactions
-    where transaction_date is not null
-)
-
-, paystub_dates as (
-    select distinct pay_date as date
-    from cleaned.paystubs
-    where pay_date is not null
-)
-
 select
-    d.date
-    , b.date is not null as has_budget_data
-    , p.date is not null as has_paystub_data
-from date_spine as d
-left join budget_dates as b on b.date = d.date
-left join paystub_dates as p on p.date = d.date
-order by d.date
+    months.generate_series as budget_month
+    , categories.id as category_id
+    , categories.category_name
+    , category_groups.category_group_name_mapping
+    , category_groups.subcategory_group_name
+from
+    generate_series(
+        (select min(date_trunc('month', transaction_date)) from cleaned.transactions)::date
+        , current_date::date
+        , interval '1 month'
+    ) as months
+cross join cleaned.categories as categories
+left join cleaned.category_groups as category_groups
+    on categories.category_group_id = category_groups.id

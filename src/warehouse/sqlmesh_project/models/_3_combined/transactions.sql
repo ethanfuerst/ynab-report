@@ -1,7 +1,8 @@
 MODEL (
   name combined.transactions,
   kind FULL,
-  grain id
+  grain id,
+  description 'Transactions enriched with category and account dimensions. Money values are positive inflow/outflow columns; dashboard signs are applied only in the dashboard layer.'
 );
 
 with all_transactions as (
@@ -9,12 +10,16 @@ with all_transactions as (
         transactions.id
         , transactions.account_id
         , transactions.category_id
-        , transactions.amount_usd as amount
+        , transactions.transaction_amount_usd
+        , transactions.transaction_inflow_usd
+        , transactions.transaction_outflow_usd
         , transactions.memo
         , transactions.paystub_file_name
         , subtransactions.id as subtransaction_id
         , subtransactions.category_id as sub_category_id
-        , subtransactions.amount_usd as subtransaction_amount
+        , subtransactions.subtransaction_amount_usd
+        , subtransactions.subtransaction_inflow_usd
+        , subtransactions.subtransaction_outflow_usd
         , subtransactions.memo as subtransaction_memo
         , transactions.transaction_date
     from cleaned.transactions as transactions
@@ -27,7 +32,9 @@ with all_transactions as (
         id
         , account_id
         , coalesce(sub_category_id, category_id) as category_id
-        , coalesce(subtransaction_amount, amount) as amount
+        , coalesce(subtransaction_amount_usd, transaction_amount_usd) as transaction_amount
+        , coalesce(subtransaction_inflow_usd, transaction_inflow_usd) as transaction_inflow
+        , coalesce(subtransaction_outflow_usd, transaction_outflow_usd) as transaction_outflow
         , coalesce(subtransaction_memo, memo) as memo
         , paystub_file_name
         , transaction_date
@@ -42,7 +49,9 @@ select
     , categories.category_name
     , category_groups.category_group_name_mapping
     , category_groups.subcategory_group_name
-    , transactions_int.amount
+    , transactions_int.transaction_amount  -- Absolute transaction or split amount, positive USD
+    , transactions_int.transaction_inflow  -- Positive inflow amount, USD
+    , transactions_int.transaction_outflow  -- Positive outflow amount, USD
     , transactions_int.memo
     , transactions_int.paystub_file_name
     , accounts.name as account_name

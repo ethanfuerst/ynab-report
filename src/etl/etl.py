@@ -86,21 +86,11 @@ def load_paystubs_from_sheets(s3: S3FileSystem) -> None:
     s3.write_df_to_parquet(df, f's3://{BUCKET_NAME}/raw-paystubs.parquet')
 
 
-def load_annual_contributions_from_sheets(s3: S3FileSystem) -> None:
-    credentials = json.loads(os.getenv('GSPREAD_CREDENTIALS').replace('\n', '\\n'))
-    with Spreadsheet(credentials=credentials, spreadsheet_name='Paystubs') as ss:
-        df = ss.worksheet('annual_contributions').read(dtype=str)
-
-    df = df.reset_index(drop=True)
-    s3.write_df_to_parquet(df, f's3://{BUCKET_NAME}/raw-annual-contributions.parquet')
-
-
 def etl_ynab_data() -> None:
     s3 = get_s3()
     budget_data = extract_budget_data()
 
     load_paystubs_from_sheets(s3)
-    load_annual_contributions_from_sheets(s3)
     extract_category_groups(budget_data, s3)
     extract_categories(budget_data, s3)
     extract_transactions(budget_data, s3)
