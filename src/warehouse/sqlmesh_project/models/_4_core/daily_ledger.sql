@@ -6,7 +6,7 @@ MODEL (
     daily_ledger_manual_link_amounts_sum_to_deposit,
     daily_ledger_manual_paystub_file_name_resolves
   ),
-  description 'Flat ledger combining YNAB transactions with paystubs. Linking is hybrid: manual memo links (combined.transactions.paystub_file_name) take precedence; remaining transactions auto-match to a paystub when the amount equals net_pay and transaction_date is within 7 days of pay_date (works regardless of category, since paychecks may show up under Income, Transfers, Reimbursements, or other inflow categories). paystub_link_source surfaces which path matched (manual / auto / orphan).'
+  description 'Flat ledger combining YNAB transactions with paystubs. Transaction money is positive inflow/outflow, paystub costs use *_spend, and savings contributions use *_saved. Linking is hybrid: manual memo links (combined.transactions.paystub_file_name) take precedence; remaining transactions auto-match to a paystub when the inflow equals net_pay + reimbursement_income and transaction_date is within 7 days of pay_date. Dashboard signs are applied only in the dashboard layer.'
 );
 
 /*
@@ -25,8 +25,8 @@ with manual_links as (
 
 /*
     Step 2: find candidate (transaction, paystub) pairs to auto-match. A pair
-    is a candidate if the transaction amount equals the paystub deposit
-    (net_pay + income_for_reimbursements, since combined.paystubs.net_pay
+    is a candidate if the transaction inflow equals the paystub deposit
+    (net_pay + reimbursement_income, since combined.paystubs.net_pay
     excludes reimbursements but the bank deposit includes them) and the
     transaction_date is within 7 days of pay_date in either direction.
     Already-manual transactions and already-manually-claimed paystubs are
@@ -39,8 +39,8 @@ with manual_links as (
         , abs(transactions.transaction_date::date - paystubs.pay_date::date) as date_diff
     from combined.transactions as transactions
     join combined.paystubs as paystubs
-        on round(transactions.amount, 2) = round(
-            coalesce(paystubs.net_pay, 0) + coalesce(paystubs.income_for_reimbursements, 0),
+        on round(transactions.transaction_inflow, 2) = round(
+            coalesce(paystubs.net_pay, 0) + coalesce(paystubs.reimbursement_income, 0),
             2
         )
         and abs(transactions.transaction_date::date - paystubs.pay_date::date) <= 7
@@ -92,7 +92,9 @@ with manual_links as (
         , transactions.id as transaction_id
         , links.paystub_file_name
         , links.paystub_link_source
-        , transactions.amount as transaction_amount_usd
+        , transactions.transaction_amount as transaction_amount_usd
+        , transactions.transaction_inflow as transaction_inflow_usd
+        , transactions.transaction_outflow as transaction_outflow_usd
         , transactions.category_id
         , transactions.category_name
         , transactions.category_group_name_mapping
@@ -103,17 +105,17 @@ with manual_links as (
         , paystubs.earnings_actual
         , paystubs.salary
         , paystubs.bonus
-        , paystubs.pre_tax_deductions
-        , paystubs.taxes
-        , paystubs.retirement_fund
-        , paystubs.hsa
-        , paystubs.post_tax_deductions
-        , paystubs.deductions
+        , paystubs.pre_tax_deductions_spend
+        , paystubs.taxes_spend
+        , paystubs.retirement_fund_saved
+        , paystubs.hsa_saved
+        , paystubs.post_tax_deductions_spend
+        , paystubs.paycheck_withheld
         , paystubs.net_pay
-        , paystubs.income_for_reimbursements
+        , paystubs.reimbursement_income
         , row_number() over (
             partition by links.paystub_file_name
-            order by transactions.transaction_date, transactions.amount desc
+            order by transactions.transaction_date, transactions.transaction_amount desc
         ) as paystub_row_rank
     from combined.transactions as transactions
     left join all_links as links
@@ -135,6 +137,8 @@ with manual_links as (
         , paystub_file_name
         , paystub_link_source
         , transaction_amount_usd
+        , transaction_inflow_usd
+        , transaction_outflow_usd
         , category_id
         , category_name
         , category_group_name_mapping
@@ -145,14 +149,14 @@ with manual_links as (
         , case when paystub_row_rank = 1 then earnings_actual end as earnings_actual
         , case when paystub_row_rank = 1 then salary end as salary
         , case when paystub_row_rank = 1 then bonus end as bonus
-        , case when paystub_row_rank = 1 then pre_tax_deductions end as pre_tax_deductions
-        , case when paystub_row_rank = 1 then taxes end as taxes
-        , case when paystub_row_rank = 1 then retirement_fund end as retirement_fund
-        , case when paystub_row_rank = 1 then hsa end as hsa
-        , case when paystub_row_rank = 1 then post_tax_deductions end as post_tax_deductions
-        , case when paystub_row_rank = 1 then deductions end as deductions
+        , case when paystub_row_rank = 1 then pre_tax_deductions_spend end as pre_tax_deductions_spend
+        , case when paystub_row_rank = 1 then taxes_spend end as taxes_spend
+        , case when paystub_row_rank = 1 then retirement_fund_saved end as retirement_fund_saved
+        , case when paystub_row_rank = 1 then hsa_saved end as hsa_saved
+        , case when paystub_row_rank = 1 then post_tax_deductions_spend end as post_tax_deductions_spend
+        , case when paystub_row_rank = 1 then paycheck_withheld end as paycheck_withheld
         , case when paystub_row_rank = 1 then net_pay end as net_pay
-        , case when paystub_row_rank = 1 then income_for_reimbursements end as income_for_reimbursements
+        , case when paystub_row_rank = 1 then reimbursement_income end as reimbursement_income
     from transactions_with_paystub_rank
 )
 
@@ -169,6 +173,8 @@ with manual_links as (
         , paystubs.file_name as paystub_file_name
         , 'orphan' as paystub_link_source
         , cast(null as decimal) as transaction_amount_usd
+        , cast(null as decimal) as transaction_inflow_usd
+        , cast(null as decimal) as transaction_outflow_usd
         , cast(null as varchar) as category_id
         , cast(null as varchar) as category_name
         , cast(null as varchar) as category_group_name_mapping
@@ -179,14 +185,14 @@ with manual_links as (
         , paystubs.earnings_actual
         , paystubs.salary
         , paystubs.bonus
-        , paystubs.pre_tax_deductions
-        , paystubs.taxes
-        , paystubs.retirement_fund
-        , paystubs.hsa
-        , paystubs.post_tax_deductions
-        , paystubs.deductions
+        , paystubs.pre_tax_deductions_spend
+        , paystubs.taxes_spend
+        , paystubs.retirement_fund_saved
+        , paystubs.hsa_saved
+        , paystubs.post_tax_deductions_spend
+        , paystubs.paycheck_withheld
         , paystubs.net_pay
-        , paystubs.income_for_reimbursements
+        , paystubs.reimbursement_income
     from combined.paystubs as paystubs
     where paystubs.file_name not in (
         select paystub_file_name from all_links where paystub_file_name is not null
