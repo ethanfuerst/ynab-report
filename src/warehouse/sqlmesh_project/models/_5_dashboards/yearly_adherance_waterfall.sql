@@ -73,6 +73,14 @@ with yearly_base as (
     group by budget_year
 )
 
+/*
+    Yearly buffer metrics are snapshots, not annual totals. The monthly model owns the Buffer Balance identity:
+    Needs/Wants available plus income received but not assigned through that month, excluding Credit Card Payments assignments.
+
+    This CTE selects the last monthly row that is valid for each year. Completed years naturally use their final emitted month,
+    while the current year uses the current month and ignores any future-budgeted rows. That keeps yearly Buffer Balance,
+    Buffer Surplus, and Reserve Surplus aligned with the monthly state that would have been knowable at that point in time.
+*/
 , latest_monthly_runway as (
     select
         budget_year

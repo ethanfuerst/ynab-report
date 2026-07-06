@@ -35,6 +35,17 @@ with monthly_base as (
     from core.monthly_adherance
 )
 
+/*
+    Buffer Balance uses two assignment concepts:
+    - total_assigned supports existing runway-style metrics and intentionally remains the raw YNAB assigned total.
+    - credit_card_assigned is excluded only from the Buffer Balance running ledger. Credit Card Payments assignments can represent
+      paydown of credit overspending that did not originate as Income-category inflow, so including them understates cash banked
+      from income.
+
+    needs_wants_balance is the YNAB available balance in the live buffer categories at month end. It is combined later with the
+    income-funded, not-yet-assigned ledger balance so the dashboard captures both money sitting in Needs/Wants categories and
+    income already received that is effectively pre-funding future budget months.
+*/
 , monthly_assignments as (
     select
         budget_month
@@ -198,6 +209,21 @@ with monthly_base as (
     from runway_state
 )
 
+/*
+    Buffer Balance is a through-month accounting identity, not a look-ahead into future budget months:
+
+        Needs/Wants available at month end
+        + cumulative Income-category inflow through month end
+        - cumulative assigned dollars through month end, excluding Credit Card Payments
+
+    The cumulative income-minus-non-credit-card-assigned term represents income received by that month that has not been consumed
+    by assignments through that month. In the current month, that same term can reconcile to money already assigned in future
+    budget months, but the formula itself never reads future-month assignments or balances. This keeps historical rows defensible:
+    each month's Buffer Balance uses only information available at that month end.
+
+    This also makes the metric invariant to whether Needs/Wants balances are swept out of old months. Sweeping lowers the
+    Needs/Wants balance term and raises the banked-income term by the same amount.
+*/
 , buffer_running as (
     select
         overflow_months.*
