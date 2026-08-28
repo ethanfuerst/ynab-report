@@ -25,7 +25,6 @@ modal_image = (
 
 @app.function(
     image=modal_image,
-    schedule=modal.Cron('5 8 * * *'),
     secrets=[modal.Secret.from_name('fiscal-pipeline-secrets')],
     retries=modal.Retries(
         max_retries=3,
