@@ -1,0 +1,137 @@
+name: Modal production deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Full main-branch commit SHA to redeploy for rollback (defaults to HEAD)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: modal-production
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    name: Resolve trusted production revision
+    runs-on: ubuntu-latest
+    outputs:
+      revision: ${{ steps.revision.outputs.revision }}
+    steps:
+      - name: Require the protected main branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo 'Production deployments must use refs/heads/main.' >&2
+          exit 1
+      - name: Check out main history
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve revision from main
+        id: revision
+        env:
+          REQUESTED_REVISION: ${{ inputs.revision }}
+        run: |
+          revision="${REQUESTED_REVISION:-$GITHUB_SHA}"
+          if [[ ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'The deployment revision must be a full lowercase commit SHA.' >&2
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$revision" origin/main; then
+            echo 'The deployment revision must be reachable from origin/main.' >&2
+            exit 1
+          fi
+          printf 'revision=%s\n' "$revision" >> "$GITHUB_OUTPUT"
+
+  validate:
+    name: Validate production revision
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the production revision
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+          persist-credentials: false
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: '0.7.19'
+          python-version: '3.12'
+          enable-cache: true
+      - name: Install locked dependencies
+        run: uv sync --frozen
+      - name: Run pre-commit checks
+        run: uv run pre-commit run --all-files
+      - name: Run tests
+        run: uv run pytest tests/deployment tests/etl tests/sheets
+
+  deploy:
+    name: Deploy protected production app
+    needs: [resolve, validate]
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      FISCAL_DEPLOYMENT_TARGET: production
+      FISCAL_DEPLOYMENT_SHA: ${{ needs.resolve.outputs.revision }}
+      FISCAL_MODAL_APP_NAME: fiscal-pipeline
+      MODAL_IMAGE_BUILDER_VERSION: '2025.06'
+      MODAL_ENVIRONMENT: main
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+    steps:
+      - name: Check out the validated production revision
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+          persist-credentials: false
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: '0.7.19'
+          python-version: '3.12'
+          enable-cache: true
+      - name: Install locked dependencies
+        run: uv sync --frozen
+      - name: Authenticate and confirm production access
+        run: uv run modal app list --env "$MODAL_ENVIRONMENT" --json
+      - name: Deploy production app
+        run: >-
+          uv run modal deploy app.py
+          --name "$FISCAL_MODAL_APP_NAME"
+          --env "$MODAL_ENVIRONMENT"
+          --tag "$FISCAL_DEPLOYMENT_SHA"
+      - name: Verify deployed app, image, environment, and Railway ownership
+        run: >-
+          uv run python scripts/modal_deployment.py
+          --deployment-sha "$FISCAL_DEPLOYMENT_SHA"
+      - name: Show deployment history
+        if: always()
+        run: |
+          uv run modal app history "$FISCAL_MODAL_APP_NAME" --env "$MODAL_ENVIRONMENT" --json > modal-history.json
+          cat modal-history.json
+      - name: Publish deployment summary
+        if: always()
+        env:
+          DEPLOYMENT_STATUS: ${{ job.status }}
+        run: |
+          {
+            printf '### Modal production deployment\n\n'
+            printf -- '- App: %s\n' "$FISCAL_MODAL_APP_NAME"
+            printf -- '- Environment: %s\n' "$MODAL_ENVIRONMENT"
+            printf -- '- Commit: %s\n' "$FISCAL_DEPLOYMENT_SHA"
+            printf -- '- Expected scheduler: Railway; Modal schedules: none\n'
+            printf -- '- Workflow result: %s\n' "$DEPLOYMENT_STATUS"
+            if [[ -f modal-history.json ]]; then
+              printf '\n```json\n'
+              cat modal-history.json
+              printf '\n```\n'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

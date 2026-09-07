@@ -1,20 +1,34 @@
 import argparse
 import logging
+import os
 
 import modal
 from eftoolkit.utils import setup_logging
 
-from src.etl.etl import etl_ynab_data
-from src.sheets.refresh_sheets import refresh_sheets
-from src.warehouse.create_warehouse import create_data_warehouse
-
 setup_logging()
 
-app = modal.App('fiscal-pipeline')
+DEPLOYMENT = {
+    'app_name': 'fiscal-pipeline',
+    'deployment_sha': os.getenv('FISCAL_DEPLOYMENT_SHA', 'local'),
+    'deployment_target': os.getenv('FISCAL_DEPLOYMENT_TARGET', 'development'),
+    'modal_environment': os.getenv('MODAL_ENVIRONMENT', 'main'),
+    'schedules': {},
+    'scheduler': 'railway',
+    'image_builder_version': os.getenv('MODAL_IMAGE_BUILDER_VERSION', ''),
+}
+app = modal.App(DEPLOYMENT['app_name'])
 
 modal_image = (
     modal.Image.debian_slim(python_version='3.10')
     .pip_install_from_pyproject('pyproject.toml')
+    .env(
+        {
+            'FISCAL_DEPLOYMENT_SHA': DEPLOYMENT['deployment_sha'],
+            'FISCAL_DEPLOYMENT_TARGET': DEPLOYMENT['deployment_target'],
+            'MODAL_ENVIRONMENT': DEPLOYMENT['modal_environment'],
+            'MODAL_IMAGE_BUILDER_VERSION': DEPLOYMENT['image_builder_version'],
+        }
+    )
     .add_local_dir(
         'src/warehouse/sqlmesh_project/',
         remote_path='/root/src/warehouse/sqlmesh_project/',
@@ -23,8 +37,15 @@ modal_image = (
 )
 
 
+@app.function(image=modal_image, timeout=30)
+def get_deployment_metadata():
+    return DEPLOYMENT
+
+
 @app.function(
     image=modal_image,
+    timeout=300,
+    max_containers=1,
     secrets=[modal.Secret.from_name('fiscal-pipeline-secrets')],
     retries=modal.Retries(
         max_retries=3,
@@ -38,6 +59,10 @@ def update_google_sheet(
     is_local_run: bool = False,
     env: str = 'prod',
 ):
+    from src.etl.etl import etl_ynab_data
+    from src.sheets.refresh_sheets import refresh_sheets
+    from src.warehouse.create_warehouse import create_data_warehouse
+
     if sync_s3:
         logging.info('Running S3 sync.')
         etl_ynab_data()
@@ -48,6 +73,16 @@ def update_google_sheet(
         create_data_warehouse(is_local_run=is_local_run)
         refresh_sheets(env=env)
         logging.info('Dashboard update process completed.')
+
+    if not is_local_run and sync_s3 and update_dashboards and env == 'prod':
+        import requests
+
+        healthcheck_url = os.getenv('FISCAL_COMPLETION_HEALTHCHECK_URL')
+        if healthcheck_url:
+            try:
+                requests.get(healthcheck_url, timeout=10).raise_for_status()
+            except requests.RequestException:
+                logging.error('Completion health check failed.')
 
 
 if __name__ == '__main__':

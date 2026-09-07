@@ -1,0 +1,8 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.trigger"
+
+[deploy]
+startCommand = "python scripts/railway_trigger.py daily"
+cronSchedule = "5 8 * * *"
+restartPolicyType = "NEVER"

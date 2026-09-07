@@ -29,4 +29,4 @@ Personal finance pipeline: pulls YNAB budget data, lands it in S3, builds a Duck
 - Ruff formatter uses `quote-style = "preserve"` so the existing single-quote convention stays.
 - Secrets load from `.env` via `python-dotenv`; Modal uses `modal.Secret.from_name('fiscal-pipeline-secrets')`.
 - `S3_SECRET_ACCESS_KEY_ID` has a project-specific `_ID` suffix. `get_s3()` / `get_duckdb()` pass creds explicitly so eftoolkit env fallbacks are not used accidentally.
-- No CI is configured; pre-commit is the enforcement gate.
+- GitHub Actions runs pre-commit and pytest on PRs; validated main revisions deploy through the protected production environment. See docs/deployment.md for cutover and rollback.
